@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { AssetBlock } from "@/components/library/asset-block";
+import { PostPackBlock } from "@/components/library/post-pack-block";
 import { CopyButton } from "@/components/ui/copy-button";
 
 type BrandOption = { id: string; name: string };
@@ -13,6 +14,7 @@ type AssetRow = {
   title: string | null;
   body: string | null;
   sort_order: number;
+  metadata?: unknown;
 };
 
 const TONES = [
@@ -121,7 +123,9 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
 
         <div>
           <h2 className="text-[10px] font-medium uppercase tracking-[0.25em] text-ui-muted-dim">2. Topic</h2>
-          <p className="mt-1 text-sm text-ui-muted-dim">Ideas, hooks, and captions will follow this brief.</p>
+          <p className="mt-1 text-sm text-ui-muted-dim">
+            You&apos;ll get several complete post packs (hook through visual direction) from this brief.
+          </p>
           <div className="mt-3 flex flex-col gap-1.5">
             <label htmlFor="gen-topic" className="text-[15px] font-medium text-ui-text">
               What do you want to post about?
@@ -208,9 +212,9 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
         <section className="flex flex-col gap-4">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="text-xl font-medium tracking-[-0.02em] text-ui-text">Ideas &amp; copy</h2>
+              <h2 className="text-xl font-medium tracking-[-0.02em] text-ui-text">Post packs</h2>
               <p className="mt-1 text-sm text-ui-muted-dim">
-                Post ideas, hooks, captions, CTAs, hashtags, and a prompt — copy any block.
+                Each card is a full post: angle, format, hook, caption, CTA, hashtags, and visual direction.
               </p>
             </div>
             <button
@@ -222,18 +226,22 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
             </button>
           </div>
           <ul className="mt-6 border-t border-black">
-            {assets.map((a) => (
-              <AssetBlock
-                key={a.id}
-                asset={{
-                  id: a.id,
-                  asset_type: a.asset_type,
-                  platform: a.platform,
-                  title: a.title,
-                  body: a.body,
-                }}
-              />
-            ))}
+            {assets.map((a, i) =>
+              a.asset_type === "post_pack" ? (
+                <PostPackBlock key={a.id} asset={a} index={i} />
+              ) : (
+                <AssetBlock
+                  key={a.id}
+                  asset={{
+                    id: a.id,
+                    asset_type: a.asset_type,
+                    platform: a.platform,
+                    title: a.title,
+                    body: a.body,
+                  }}
+                />
+              ),
+            )}
           </ul>
           <p className="text-sm text-ui-muted-dim">
             Saved automatically — view anytime under <span className="text-ui-muted">Saved</span>.

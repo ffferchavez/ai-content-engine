@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AssetBlock } from "@/components/library/asset-block";
+import { PostPackBlock } from "@/components/library/post-pack-block";
 import { SummaryWithCopy } from "@/components/library/summary-with-copy";
 import { getCurrentOrganizationId } from "@/lib/org";
 import { createClient } from "@/lib/supabase/server";
@@ -51,7 +52,7 @@ export default async function LibraryDetailPage({ params }: PageProps) {
 
   const { data: assetRows } = await supabase
     .from("generated_assets")
-    .select("id, asset_type, platform, title, body, sort_order")
+    .select("id, asset_type, platform, title, body, sort_order, metadata")
     .eq("content_generation_id", gen.id)
     .order("sort_order", { ascending: true });
 
@@ -101,25 +102,40 @@ export default async function LibraryDetailPage({ params }: PageProps) {
       {assets.length > 0 ? (
         <section>
           <h2 className="text-[10px] font-medium uppercase tracking-[0.25em] text-ui-muted-dim">
-            Ideas &amp; copy
+            Post packs
           </h2>
           <ul className="mt-6 border-t border-black">
-            {assets.map((a) => (
-              <AssetBlock
-                key={a.id}
-                asset={{
-                  id: a.id,
-                  asset_type: a.asset_type,
-                  platform: a.platform,
-                  title: a.title,
-                  body: a.body,
-                }}
-              />
-            ))}
+            {assets.map((a, i) =>
+              a.asset_type === "post_pack" ? (
+                <PostPackBlock
+                  key={a.id}
+                  asset={{
+                    id: a.id,
+                    asset_type: a.asset_type,
+                    platform: a.platform,
+                    title: a.title,
+                    body: a.body,
+                    metadata: a.metadata,
+                  }}
+                  index={i}
+                />
+              ) : (
+                <AssetBlock
+                  key={a.id}
+                  asset={{
+                    id: a.id,
+                    asset_type: a.asset_type,
+                    platform: a.platform,
+                    title: a.title,
+                    body: a.body,
+                  }}
+                />
+              ),
+            )}
           </ul>
         </section>
       ) : gen.status === "completed" ? (
-        <p className="text-sm text-ui-muted-dim">No pieces stored for this run.</p>
+        <p className="text-sm text-ui-muted-dim">No post packs stored for this run.</p>
       ) : null}
 
       <Link

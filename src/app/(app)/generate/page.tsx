@@ -49,8 +49,8 @@ export default async function GeneratePage() {
           New content pack
         </h1>
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ui-muted sm:mt-6 sm:text-base">
-          Pick a brand, describe the topic, and get a structured pack you can copy — ideas, hooks,
-          captions, and more. Results are saved automatically.
+          Pick a brand, describe the topic, and get 3–5 ready-to-post packs: angle, format, hook,
+          caption, CTA, hashtags, and visual direction. Results are saved automatically.
         </p>
       </header>
       <GeneratePanel brands={brands} />

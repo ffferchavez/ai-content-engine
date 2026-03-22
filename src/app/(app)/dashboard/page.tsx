@@ -17,7 +17,7 @@ const rows = [
     href: "/generate",
     kicker: "Create",
     title: "Generate a content pack",
-    body: "Ideas, hooks, captions, CTAs, hashtags, and an image prompt — saved automatically.",
+    body: "3–5 complete post packs (hook, caption, CTA, visuals) — saved automatically.",
   },
   {
     href: "/library",

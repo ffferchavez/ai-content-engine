@@ -135,15 +135,23 @@ export async function POST(request: Request) {
       tone,
     });
 
-    const assetRows = pack.pieces.map((p, i) => ({
+    const assetRows = pack.post_packs.map((p, i) => ({
       content_generation_id: generationId,
-      asset_type: p.kind,
-      platform: p.platform ?? platform ?? null,
+      asset_type: "post_pack",
+      platform: platform ?? null,
       language: brand.default_language ?? "en",
       sort_order: i,
-      title: p.title ?? null,
-      body: p.body,
-      metadata: {},
+      title: p.title,
+      body: p.caption,
+      metadata: {
+        post_angle: p.post_angle,
+        suggested_format: p.suggested_format,
+        hook: p.hook,
+        caption: p.caption,
+        call_to_action: p.call_to_action,
+        hashtags: p.hashtags,
+        visual_direction: p.visual_direction,
+      },
     }));
 
     const { error: assetsError } = await supabase.from("generated_assets").insert(assetRows);
@@ -165,7 +173,7 @@ export async function POST(request: Request) {
       .from("content_generations")
       .update({
         status: "completed",
-        output_summary: { summary: pack.summary, piece_count: pack.pieces.length },
+        output_summary: { summary: pack.summary, post_count: pack.post_packs.length },
         model: "gpt-4o-mini",
         updated_at: new Date().toISOString(),
       })
@@ -177,7 +185,7 @@ export async function POST(request: Request) {
 
     const { data: assetsOut } = await supabase
       .from("generated_assets")
-      .select("id, asset_type, platform, title, body, sort_order")
+      .select("id, asset_type, platform, title, body, sort_order, metadata")
       .eq("content_generation_id", generationId)
       .order("sort_order", { ascending: true });
 

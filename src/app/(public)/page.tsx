@@ -9,7 +9,8 @@ export default function HomePage() {
           Social posts that sound like you.
         </h1>
         <p className="mt-6 max-w-xl text-base leading-relaxed text-ui-muted sm:mt-8 sm:text-lg">
-          Tell us about your brand once. Then get ideas, captions, and more — ready to copy and use.
+          Tell us about your brand once. Then get full post packs — hook, caption, CTA, hashtags, and
+          visual direction — ready to copy.
         </p>
       </section>
 

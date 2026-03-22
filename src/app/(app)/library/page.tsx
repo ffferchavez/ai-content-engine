@@ -136,7 +136,9 @@ export default async function LibraryPage() {
                   <div className="flex shrink-0 items-center justify-between gap-4 border-t border-black/10 pt-4 sm:w-auto sm:flex-col sm:items-end sm:border-t-0 sm:pt-0">
                     <div className="text-left text-sm tabular-nums sm:text-right">
                       {g.status === "completed" ? (
-                        <span className="text-emerald-800">{n} pieces</span>
+                        <span className="text-emerald-800">
+                          {n} {n === 1 ? "post" : "posts"}
+                        </span>
                       ) : g.status === "failed" ? (
                         <span className="text-red-700">Failed</span>
                       ) : (

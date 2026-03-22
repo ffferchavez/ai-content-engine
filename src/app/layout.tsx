@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Inter } from "next/font/google";
+import { Geist_Mono, Syne } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const syne = Syne({
+  variable: "--font-syne",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const geistMono = Geist_Mono({
@@ -26,7 +26,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#ffffff",
+  themeColor: "#0a0a0a",
 };
 
 export default function RootLayout({
@@ -38,10 +38,10 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${syne.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body
-        className="flex min-h-[100dvh] min-h-screen flex-col text-ui-text"
+        className="flex min-h-[100dvh] min-h-screen flex-col bg-ui-bg font-sans text-ui-text"
         suppressHydrationWarning
       >
         {children}

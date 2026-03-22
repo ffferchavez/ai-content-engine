@@ -1,49 +1,58 @@
-import Link from "next/link";
-import { AppNav } from "@/components/app/app-nav";
-import { SignOutButton } from "@/components/auth/sign-out-button";
+"use client";
+
+import { Menu } from "lucide-react";
+import { useState } from "react";
+import { AppSidebar } from "@/components/app/app-sidebar";
+import { HelionWordmarkLink } from "@/components/brand/helion-wordmark";
 import { MAIN_PAD, PAGE_INSET } from "@/lib/ui/shell";
 
 export function AppShell({
   userEmail,
+  displayName,
+  initials,
   children,
 }: {
   userEmail: string;
+  displayName: string;
+  initials: string;
   children: React.ReactNode;
 }) {
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <header className="w-full border-b border-black bg-ui-bg pt-[env(safe-area-inset-top)]">
+    <div className="flex min-h-[100dvh] min-h-screen flex-1 flex-col bg-[#fafafa]">
+      <header className="shrink-0 border-b border-neutral-200/80 bg-white pt-[env(safe-area-inset-top)]">
         <div
           className={`${PAGE_INSET} flex flex-wrap items-center justify-between gap-x-4 gap-y-3 py-3 sm:gap-x-6 sm:py-4`}
         >
-          <Link
-            href="/dashboard"
-            className="flex min-h-[44px] shrink-0 flex-col justify-center gap-0.5"
-            aria-label="Helion Media home"
-          >
-            <span className="text-[10px] font-medium uppercase tracking-[0.35em] text-ui-muted-dim">
-              Helion
-            </span>
-            <span className="text-base font-medium tracking-[-0.02em] text-ui-text">Media</span>
-          </Link>
-          <AppNav />
-          <div className="flex min-h-[44px] shrink-0 flex-wrap items-center justify-end gap-2 sm:gap-6 md:gap-8">
-            <Link
-              href="/settings"
-              className="inline-flex min-h-[44px] items-center text-[13px] font-medium tracking-wide text-ui-muted transition-colors hover:text-ui-text"
+          <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4 md:flex-none md:gap-6">
+            <button
+              type="button"
+              onClick={() => setMobileNavOpen(true)}
+              className="inline-flex size-11 shrink-0 items-center justify-center rounded-md text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-950 md:hidden"
+              aria-label="Open menu"
             >
-              Account
-            </Link>
-            <span className="hidden max-w-[min(160px,40vw)] truncate text-[11px] uppercase tracking-wider text-ui-muted-dim lg:inline">
-              {userEmail}
-            </span>
-            <SignOutButton />
+              <Menu className="size-[22px]" strokeWidth={1.5} aria-hidden />
+            </button>
+            <HelionWordmarkLink href="/dashboard" variant="on-light" />
           </div>
         </div>
       </header>
-      <main className={`relative z-0 flex w-full min-w-0 flex-1 flex-col ${PAGE_INSET} ${MAIN_PAD}`}>
-        {children}
-      </main>
+
+      <div className="flex min-h-0 min-w-0 flex-1">
+        <AppSidebar
+          mobileOpen={mobileNavOpen}
+          onMobileOpenChange={setMobileNavOpen}
+          userEmail={userEmail}
+          displayName={displayName}
+          initials={initials}
+        />
+        <main
+          className={`relative z-0 flex w-full min-w-0 flex-1 flex-col overflow-auto ${PAGE_INSET} ${MAIN_PAD}`}
+        >
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

@@ -12,9 +12,9 @@ export default async function BrandsPage() {
 
   if (!orgId) {
     return (
-      <div className="flex flex-col gap-3">
-        <h1 className="text-2xl font-semibold text-white">Brands</h1>
-        <p className="text-sm leading-relaxed text-helion-warning/90" role="status">
+      <div className="flex w-full min-w-0 flex-col gap-3">
+        <h1 className="text-2xl font-medium tracking-[-0.03em] text-ui-text sm:text-3xl">Brands</h1>
+        <p className="text-sm leading-relaxed text-ui-warning/90" role="status">
           We couldn&apos;t finish setting up your account. Try signing out and signing in again. If the
           problem continues, contact support.
         </p>
@@ -34,9 +34,9 @@ export default async function BrandsPage() {
   if (error) {
     console.error("[brands] list:", error.message);
     return (
-      <div className="flex flex-col gap-3">
-        <h1 className="text-2xl font-semibold text-white">Brands</h1>
-        <p className="text-sm text-red-400" role="alert">
+      <div className="flex w-full min-w-0 flex-col gap-3">
+        <h1 className="text-2xl font-medium tracking-[-0.03em] text-ui-text sm:text-3xl">Brands</h1>
+        <p className="text-sm text-red-700" role="alert">
           We couldn&apos;t load your brands. Please refresh the page and try again.
         </p>
       </div>
@@ -52,14 +52,17 @@ export default async function BrandsPage() {
   }));
 
   return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Brands</h1>
-        <p className="mt-3 text-base leading-relaxed text-helion-muted">
+    <div className="flex w-full min-w-0 flex-col gap-10 sm:gap-12">
+      <header className="w-full border-b border-black pb-8 sm:pb-10">
+        <p className="text-[10px] font-medium uppercase tracking-[0.35em] text-ui-muted-dim">Brands</p>
+        <h1 className="mt-3 text-2xl font-medium tracking-[-0.03em] text-ui-text sm:mt-4 sm:text-3xl md:text-4xl">
+          Your profiles
+        </h1>
+        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ui-muted sm:mt-6 sm:text-base">
           Add one entry for each business or project. When you create posts, you&apos;ll pick which brand
           to use.
         </p>
-      </div>
+      </header>
       <BrandsPanel brands={brands} />
     </div>
   );

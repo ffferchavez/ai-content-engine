@@ -1,53 +1,51 @@
 @import "tailwindcss";
 
-/* Helion City–aligned design system: deep navy base, solar gold accent, clean enterprise type */
+/* Polestar-adjacent: pure white / black, architectural lines, turquoise only as a rare accent */
 :root {
-  --helion-bg: #070b14;
-  --helion-bg-elevated: #0c1222;
-  --helion-surface: #111b2e;
-  --helion-surface-hover: #162236;
-  --helion-border: rgba(148, 163, 184, 0.12);
-  --helion-border-strong: rgba(148, 163, 184, 0.22);
-  --helion-accent: #e5a623;
-  --helion-accent-hover: #f0c04a;
-  --helion-accent-subtle: rgba(229, 166, 35, 0.12);
-  --helion-on-accent: #0a0e18;
-  --helion-text: #f1f5f9;
-  --helion-muted: #94a3b8;
-  --helion-muted-dim: #64748b;
-  --helion-warning: #fcd34d;
-  --helion-warning-bg: rgba(251, 191, 36, 0.08);
+  --ui-bg: #ffffff;
+  --ui-bg-muted: #fafafa;
+  --ui-bg-elevated: #ffffff;
+  --ui-surface: #f5f5f5;
+  --ui-surface-hover: #ebebeb;
+  --ui-line: #000000;
+  --ui-line-soft: rgba(0, 0, 0, 0.08);
+  --ui-text: #000000;
+  --ui-muted: #525252;
+  --ui-muted-dim: #737373;
+  --ui-accent: #0d9488;
+  --ui-accent-hover: #0f766e;
+  --ui-accent-muted: rgba(13, 148, 136, 0.12);
+  --ui-on-accent: #ffffff;
+  --ui-warning: #9a3412;
 }
 
 @theme inline {
-  --color-background: var(--helion-bg);
-  --color-foreground: var(--helion-text);
-  --color-helion-bg: var(--helion-bg);
-  --color-helion-text: var(--helion-text);
-  --color-helion-elevated: var(--helion-bg-elevated);
-  --color-helion-surface: var(--helion-surface);
-  --color-helion-surface-hover: var(--helion-surface-hover);
-  --color-helion-accent: var(--helion-accent);
-  --color-helion-accent-hover: var(--helion-accent-hover);
-  --color-helion-on-accent: var(--helion-on-accent);
-  --color-helion-muted: var(--helion-muted);
-  --color-helion-muted-dim: var(--helion-muted-dim);
-  --color-helion-warning: var(--helion-warning);
-  --font-sans: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --color-background: var(--ui-bg);
+  --color-foreground: var(--ui-text);
+  --color-ui-bg: var(--ui-bg);
+  --color-ui-text: var(--ui-text);
+  --color-ui-elevated: var(--ui-bg-elevated);
+  --color-ui-surface: var(--ui-surface);
+  --color-ui-surface-hover: var(--ui-surface-hover);
+  --color-ui-accent: var(--ui-accent);
+  --color-ui-accent-hover: var(--ui-accent-hover);
+  --color-ui-accent-muted: var(--ui-accent-muted);
+  --color-ui-on-accent: var(--ui-on-accent);
+  --color-ui-muted: var(--ui-muted);
+  --color-ui-muted-dim: var(--ui-muted-dim);
+  --color-ui-warning: var(--ui-warning);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background-color: var(--helion-bg);
-  color: var(--helion-text);
-  font-family: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
-  background-image:
-    radial-gradient(ellipse 100% 60% at 50% -15%, rgba(229, 166, 35, 0.06), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 100% 0%, rgba(56, 189, 248, 0.03), transparent 45%);
-  background-attachment: fixed;
+  background-color: var(--ui-bg);
+  color: var(--ui-text);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  overflow-x: hidden;
 }
 
 ::selection {
-  background: rgba(229, 166, 35, 0.25);
-  color: var(--helion-text);
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--ui-text);
 }

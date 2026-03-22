@@ -6,6 +6,27 @@ export const metadata = {
   title: "Home",
 };
 
+const rows = [
+  {
+    href: "/brands",
+    kicker: "Brands",
+    title: "Manage brand profiles",
+    body: "Voice and audience — used every time you generate.",
+  },
+  {
+    href: "/generate",
+    kicker: "Create",
+    title: "Generate a content pack",
+    body: "Ideas, hooks, captions, CTAs, hashtags, and an image prompt — saved automatically.",
+  },
+  {
+    href: "/library",
+    kicker: "Saved",
+    title: "Copy past packs",
+    body: "Open any run to see full text and copy buttons.",
+  },
+] as const;
+
 export default async function DashboardPage() {
   const supabase = await createClient();
   const {
@@ -45,69 +66,62 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-10">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+    <div className="flex w-full min-w-0 flex-col">
+      <header className="w-full border-b border-black pb-8 sm:pb-10">
+        <p className="text-[10px] font-medium uppercase tracking-[0.35em] text-ui-muted-dim">Workspace</p>
+        <h1 className="mt-3 text-2xl font-medium tracking-[-0.03em] text-ui-text sm:mt-4 sm:text-3xl md:text-4xl">
           Hi, {displayName}
         </h1>
-        <p className="mt-4 text-base leading-relaxed text-helion-muted">
+        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ui-muted sm:mt-6 sm:text-base">
           Set up your brand, create a pack, then copy from Saved anytime.
         </p>
         {orgCtx ? (
-          <div className="mt-6 flex flex-wrap gap-3">
-            <div className="rounded-xl border border-white/10 bg-helion-surface/90 px-4 py-3">
-              <p className="text-xs font-medium uppercase tracking-wide text-helion-muted-dim">Brands</p>
-              <p className="mt-1 text-2xl font-semibold text-helion-text">{brandCount}</p>
+          <div className="mt-8 grid w-full grid-cols-1 gap-px bg-black sm:mt-10 sm:grid-cols-2">
+            <div className="min-h-[100px] bg-ui-bg px-4 py-4 sm:px-5 sm:py-5">
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-ui-muted-dim">Brands</p>
+              <p className="mt-2 text-2xl font-medium tabular-nums tracking-tight text-ui-text sm:text-3xl">
+                {brandCount}
+              </p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-helion-surface/90 px-4 py-3">
-              <p className="text-xs font-medium uppercase tracking-wide text-helion-muted-dim">Saved packs</p>
-              <p className="mt-1 text-2xl font-semibold text-helion-text">{savedCount}</p>
+            <div className="min-h-[100px] bg-ui-bg px-4 py-4 sm:px-5 sm:py-5">
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-ui-muted-dim">Saved packs</p>
+              <p className="mt-2 text-2xl font-medium tabular-nums tracking-tight text-ui-text sm:text-3xl">
+                {savedCount}
+              </p>
             </div>
           </div>
         ) : null}
         {!orgCtx ? (
-          <p className="mt-4 text-sm leading-relaxed text-helion-warning/90" role="status">
+          <p className="mt-6 text-sm leading-relaxed text-ui-warning/90 sm:mt-8" role="status">
             We couldn&apos;t finish setting up your account. Try signing out and signing in again. If that
             doesn&apos;t help, contact support.
           </p>
         ) : null}
-      </div>
+      </header>
 
-      <div className="flex flex-col gap-3">
-        <Link
-          href="/brands"
-          className="rounded-2xl border border-white/10 bg-helion-surface/90 px-6 py-6 transition hover:border-helion-accent/30 hover:bg-helion-surface-hover"
-        >
-          <h2 className="text-sm font-medium text-helion-muted-dim">Brands</h2>
-          <p className="mt-2 text-lg font-semibold text-white">Manage brand profiles</p>
-          <p className="mt-2 text-sm leading-relaxed text-helion-muted">
-            Voice and audience — used every time you generate.
-          </p>
-          <span className="mt-3 inline-block text-sm font-medium text-helion-accent">Open →</span>
-        </Link>
-        <Link
-          href="/generate"
-          className="rounded-2xl border border-white/10 bg-helion-surface/90 px-6 py-6 transition hover:border-helion-accent/30 hover:bg-helion-surface-hover"
-        >
-          <h2 className="text-sm font-medium text-helion-muted-dim">Create</h2>
-          <p className="mt-2 text-lg font-semibold text-white">Generate a content pack</p>
-          <p className="mt-2 text-sm leading-relaxed text-helion-muted">
-            Ideas, hooks, captions, CTAs, hashtags, and an image prompt — saved automatically.
-          </p>
-          <span className="mt-3 inline-block text-sm font-medium text-helion-accent">Open →</span>
-        </Link>
-        <Link
-          href="/library"
-          className="rounded-2xl border border-white/10 bg-helion-surface/90 px-6 py-6 transition hover:border-helion-accent/30 hover:bg-helion-surface-hover"
-        >
-          <h2 className="text-sm font-medium text-helion-muted-dim">Saved</h2>
-          <p className="mt-2 text-lg font-semibold text-white">Copy past packs</p>
-          <p className="mt-2 text-sm leading-relaxed text-helion-muted">
-            Open any run to see full text and copy buttons.
-          </p>
-          <span className="mt-3 inline-block text-sm font-medium text-helion-accent">Open →</span>
-        </Link>
-      </div>
+      <nav className="mt-0 w-full border-t border-black" aria-label="Workspace">
+        {rows.map((row) => (
+          <Link
+            key={row.href}
+            href={row.href}
+            className="group flex w-full min-w-0 items-start justify-between gap-4 border-b border-black py-8 transition-colors hover:bg-neutral-50 sm:gap-8 sm:py-10"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-medium uppercase tracking-[0.25em] text-ui-muted-dim">{row.kicker}</p>
+              <p className="mt-2 text-lg font-medium tracking-[-0.02em] text-ui-text sm:mt-3 sm:text-xl md:text-2xl">
+                {row.title}
+              </p>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ui-muted sm:mt-3">{row.body}</p>
+            </div>
+            <span
+              className="shrink-0 pt-0.5 text-2xl font-extralight leading-none text-ui-muted transition-colors group-hover:text-ui-text sm:pt-1 sm:text-3xl"
+              aria-hidden
+            >
+              ›
+            </span>
+          </Link>
+        ))}
+      </nav>
     </div>
   );
 }

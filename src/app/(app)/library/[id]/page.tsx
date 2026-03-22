@@ -17,9 +17,12 @@ export default async function LibraryDetailPage({ params }: PageProps) {
 
   if (!orgId) {
     return (
-      <div className="flex flex-col gap-3">
-        <p className="text-sm text-helion-warning/90">We couldn&apos;t load your workspace.</p>
-        <Link href="/library" className="text-sm text-helion-accent hover:text-helion-accent-hover">
+      <div className="flex w-full min-w-0 flex-col gap-3">
+        <p className="text-sm text-ui-warning/90">We couldn&apos;t load your workspace.</p>
+        <Link
+          href="/library"
+          className="text-sm font-medium underline decoration-black/25 underline-offset-4 transition hover:decoration-black"
+        >
           ← Back to Saved
         </Link>
       </div>
@@ -63,7 +66,7 @@ export default async function LibraryDetailPage({ params }: PageProps) {
     gen.output_summary !== null &&
     "summary" in gen.output_summary
       ? String((gen.output_summary as { summary?: string }).summary ?? "")
-    : "";
+      : "";
 
   const when = new Date(gen.created_at).toLocaleString(undefined, {
     dateStyle: "medium",
@@ -71,29 +74,36 @@ export default async function LibraryDetailPage({ params }: PageProps) {
   });
 
   return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <Link href="/library" className="text-sm text-helion-muted-dim transition hover:text-helion-text">
+    <div className="flex w-full min-w-0 flex-col gap-10 sm:gap-12">
+      <header className="w-full border-b border-black pb-8 sm:pb-10">
+        <Link
+          href="/library"
+          className="text-[10px] font-medium uppercase tracking-[0.25em] text-ui-muted-dim transition-colors hover:text-ui-text"
+        >
           ← Saved
         </Link>
-        <p className="mt-4 text-xs text-helion-muted-dim">{when}</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">{topic}</h1>
-        <p className="mt-1 text-sm text-helion-muted">
+        <p className="mt-6 text-[10px] font-medium uppercase tracking-[0.2em] text-ui-muted-dim">{when}</p>
+        <h1 className="mt-3 text-2xl font-medium tracking-[-0.03em] text-ui-text sm:mt-4 sm:text-3xl md:text-4xl">
+          {topic}
+        </h1>
+        <p className="mt-3 text-sm text-ui-muted sm:mt-4">
           {brandName}
           {tone ? ` · ${tone}` : ""}
           {platform ? ` · ${platform}` : ""}
         </p>
         {gen.status === "failed" && gen.error_message ? (
-          <p className="mt-4 text-sm text-red-400/90">{gen.error_message}</p>
+          <p className="mt-6 text-sm text-red-700">{gen.error_message}</p>
         ) : null}
-      </div>
+      </header>
 
       {summary ? <SummaryWithCopy text={summary} /> : null}
 
       {assets.length > 0 ? (
         <section>
-          <h2 className="text-lg font-semibold text-white">Ideas &amp; copy</h2>
-          <ul className="mt-4 flex flex-col gap-3">
+          <h2 className="text-[10px] font-medium uppercase tracking-[0.25em] text-ui-muted-dim">
+            Ideas &amp; copy
+          </h2>
+          <ul className="mt-6 border-t border-black">
             {assets.map((a) => (
               <AssetBlock
                 key={a.id}
@@ -109,12 +119,12 @@ export default async function LibraryDetailPage({ params }: PageProps) {
           </ul>
         </section>
       ) : gen.status === "completed" ? (
-        <p className="text-sm text-helion-muted-dim">No pieces stored for this run.</p>
+        <p className="text-sm text-ui-muted-dim">No pieces stored for this run.</p>
       ) : null}
 
       <Link
         href="/generate"
-        className="inline-flex w-fit rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5"
+        className="inline-flex w-fit border border-black px-5 py-2.5 text-sm font-medium text-ui-text transition hover:bg-neutral-50"
       >
         Create another pack
       </Link>

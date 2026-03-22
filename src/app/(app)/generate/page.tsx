@@ -11,9 +11,9 @@ export default async function GeneratePage() {
 
   if (!orgId) {
     return (
-      <div className="flex flex-col gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Create posts</h1>
-        <p className="text-sm text-helion-warning/90" role="status">
+      <div className="flex w-full min-w-0 flex-col gap-3">
+        <h1 className="text-2xl font-medium tracking-[-0.03em] text-ui-text sm:text-3xl">Create posts</h1>
+        <p className="text-sm text-ui-warning/90" role="status">
           We couldn&apos;t load your workspace. Try signing out and back in.
         </p>
       </div>
@@ -30,9 +30,9 @@ export default async function GeneratePage() {
   if (error) {
     console.error("[generate] brands:", error.message);
     return (
-      <div className="flex flex-col gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Create posts</h1>
-        <p className="text-sm text-red-400" role="alert">
+      <div className="flex w-full min-w-0 flex-col gap-3">
+        <h1 className="text-2xl font-medium tracking-[-0.03em] text-ui-text sm:text-3xl">Create posts</h1>
+        <p className="text-sm text-red-700" role="alert">
           Could not load brands. Refresh and try again.
         </p>
       </div>
@@ -42,14 +42,17 @@ export default async function GeneratePage() {
   const brands = brandRows ?? [];
 
   return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Create posts</h1>
-        <p className="mt-3 text-base leading-relaxed text-helion-muted">
+    <div className="flex w-full min-w-0 flex-col gap-10 sm:gap-12">
+      <header className="w-full border-b border-black pb-8 sm:pb-10">
+        <p className="text-[10px] font-medium uppercase tracking-[0.35em] text-ui-muted-dim">Create</p>
+        <h1 className="mt-3 text-2xl font-medium tracking-[-0.03em] text-ui-text sm:mt-4 sm:text-3xl md:text-4xl">
+          New content pack
+        </h1>
+        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ui-muted sm:mt-6 sm:text-base">
           Pick a brand, describe the topic, and get a structured pack you can copy — ideas, hooks,
           captions, and more. Results are saved automatically.
         </p>
-      </div>
+      </header>
       <GeneratePanel brands={brands} />
     </div>
   );

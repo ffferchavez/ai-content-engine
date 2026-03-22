@@ -43,7 +43,7 @@ export function SignupForm() {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="fullName" className="text-[15px] font-medium text-helion-text">
+        <label htmlFor="fullName" className="text-[15px] font-medium text-ui-text">
           Your name
         </label>
         <input
@@ -53,12 +53,12 @@ export function SignupForm() {
           autoComplete="name"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
-          className="w-full rounded-xl border border-white/10 bg-helion-surface px-4 py-3 text-[15px] text-helion-text outline-none placeholder:text-helion-muted-dim focus:border-helion-accent/40 focus:ring-2 focus:ring-helion-accent/25"
+          className="w-full rounded-none border border-black bg-ui-bg px-4 py-3 text-[15px] text-ui-text outline-none placeholder:text-ui-muted-dim focus:border-black focus:ring-1 focus:ring-black/10"
           placeholder="Alex Rivera"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-[15px] font-medium text-helion-text">
+        <label htmlFor="email" className="text-[15px] font-medium text-ui-text">
           Email
         </label>
         <input
@@ -69,12 +69,12 @@ export function SignupForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-xl border border-white/10 bg-helion-surface px-4 py-3 text-[15px] text-helion-text outline-none placeholder:text-helion-muted-dim focus:border-helion-accent/40 focus:ring-2 focus:ring-helion-accent/25"
+          className="w-full rounded-none border border-black bg-ui-bg px-4 py-3 text-[15px] text-ui-text outline-none placeholder:text-ui-muted-dim focus:border-black focus:ring-1 focus:ring-black/10"
           placeholder="you@company.com"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-[15px] font-medium text-helion-text">
+        <label htmlFor="password" className="text-[15px] font-medium text-ui-text">
           Password
         </label>
         <input
@@ -86,30 +86,30 @@ export function SignupForm() {
           minLength={8}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-xl border border-white/10 bg-helion-surface px-4 py-3 text-[15px] text-helion-text outline-none placeholder:text-helion-muted-dim focus:border-helion-accent/40 focus:ring-2 focus:ring-helion-accent/25"
+          className="w-full rounded-none border border-black bg-ui-bg px-4 py-3 text-[15px] text-ui-text outline-none placeholder:text-ui-muted-dim focus:border-black focus:ring-1 focus:ring-black/10"
         />
-        <p className="text-xs text-helion-muted-dim">At least 8 characters.</p>
+        <p className="text-xs text-ui-muted-dim">At least 8 characters.</p>
       </div>
       {error ? (
-        <p className="text-sm text-red-400" role="alert">
+        <p className="text-sm text-red-700" role="alert">
           {error}
         </p>
       ) : null}
       {message ? (
-        <p className="text-sm text-emerald-400" role="status">
+        <p className="text-sm text-emerald-800" role="status">
           {message}
         </p>
       ) : null}
       <button
         type="submit"
         disabled={pending}
-        className="mt-1 w-full rounded-xl bg-helion-accent py-3.5 text-[15px] font-semibold text-helion-on-accent transition hover:bg-helion-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-2 w-full rounded-none bg-black py-3.5 text-[15px] font-medium text-white transition hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending ? "Creating account…" : "Create account"}
       </button>
-      <p className="text-center text-sm text-helion-muted-dim">
+      <p className="text-center text-sm text-ui-muted-dim">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-helion-accent hover:text-helion-accent-hover">
+        <Link href="/login" className="font-medium underline decoration-black/25 underline-offset-4 transition hover:decoration-black">
           Log in
         </Link>
       </p>

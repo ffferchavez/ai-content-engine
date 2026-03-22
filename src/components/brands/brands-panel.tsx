@@ -25,17 +25,17 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={htmlFor} className="text-[15px] font-medium text-helion-text">
+      <label htmlFor={htmlFor} className="text-[15px] font-medium text-ui-text">
         {label}
       </label>
-      {hint ? <p className="text-sm text-helion-muted-dim">{hint}</p> : null}
+      {hint ? <p className="text-sm text-ui-muted-dim">{hint}</p> : null}
       {children}
     </div>
   );
 }
 
 const fieldClass =
-  "w-full rounded-xl border border-white/10 bg-helion-surface px-4 py-3 text-[15px] text-helion-text outline-none placeholder:text-helion-muted-dim focus:border-helion-accent/40 focus:ring-2 focus:ring-helion-accent/25";
+  "w-full rounded-none border border-black bg-ui-bg px-4 py-3 text-[15px] text-ui-text outline-none placeholder:text-ui-muted-dim focus:border-black focus:ring-1 focus:ring-black/10";
 const textareaClass = `${fieldClass} min-h-[100px] resize-y leading-relaxed`;
 
 const LANG_OPTIONS: { value: string; label: string }[] = [
@@ -61,7 +61,7 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
   }
 
   return (
-    <div className="flex flex-col gap-12">
+    <div className="flex w-full min-w-0 flex-col gap-10 sm:gap-12">
       <section>
         {brands.length > 0 ? (
           <button
@@ -70,18 +70,18 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
               setCreateError(null);
               setShowAddForm((v) => !v);
             }}
-            className="mb-6 w-full rounded-2xl border border-dashed border-white/20 bg-helion-surface/70 py-4 text-[15px] font-medium text-slate-300 transition hover:border-helion-accent/40 hover:bg-helion-surface/85 hover:text-helion-text"
+            className="mb-6 w-full rounded-none border border-dashed border-black/30 bg-ui-bg py-4 text-[15px] font-medium text-ui-muted transition hover:border-black hover:bg-neutral-50 hover:text-ui-text"
           >
             {showAddForm ? "Close" : "+ Add another brand"}
           </button>
         ) : null}
 
         {showAddForm || brands.length === 0 ? (
-          <div className="rounded-2xl border border-white/10 bg-helion-surface/90 p-6 sm:p-8">
-            <h2 className="text-lg font-semibold text-white">
+          <div className="rounded-none border border-black bg-ui-bg p-6 sm:p-8">
+            <h2 className="text-xl font-medium tracking-[-0.02em] text-ui-text">
               {brands.length === 0 ? "Add your first brand" : "New brand"}
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-helion-muted-dim">
+            <p className="mt-2 text-sm leading-relaxed text-ui-muted-dim">
               Tell us about the business or project. This helps the AI match your voice when you create
               posts.
             </p>
@@ -203,7 +203,7 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
               </Field>
 
               {createError ? (
-                <p className="text-sm text-red-400" role="alert">
+                <p className="text-sm text-red-700" role="alert">
                   {createError}
                 </p>
               ) : null}
@@ -211,7 +211,7 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
               <button
                 type="submit"
                 disabled={pending}
-                className="w-full rounded-xl bg-helion-accent py-3.5 text-[15px] font-semibold text-helion-on-accent transition hover:bg-helion-accent-hover disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[200px] sm:px-8"
+                className="w-full rounded-none bg-black py-3.5 text-[15px] font-medium text-white transition hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[200px] sm:px-8"
               >
                 {pending ? "Saving…" : "Save brand"}
               </button>
@@ -222,20 +222,20 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
 
       <section className="flex flex-col gap-4">
         {listError ? (
-          <p className="text-sm text-red-400" role="alert">
+          <p className="text-sm text-red-700" role="alert">
             {listError}
           </p>
         ) : null}
 
         {brands.length === 0 ? null : (
           <>
-            <h2 className="text-lg font-semibold text-white">Your brands</h2>
-            <ul className="flex flex-col gap-3">
+            <h2 className="text-[10px] font-medium uppercase tracking-[0.25em] text-ui-muted-dim">Your brands</h2>
+            <ul className="mt-6 border-t border-black">
               {brands.map((brand) => (
                 <li key={brand.id}>
                   {editingId === brand.id ? (
-                    <div className="rounded-2xl border border-helion-accent/30 bg-helion-surface/85 p-6 sm:p-8">
-                      <h3 className="text-lg font-semibold text-white">Edit brand</h3>
+                    <div className="rounded-none border border-black bg-ui-bg p-6 sm:p-8">
+                      <h3 className="text-xl font-medium tracking-[-0.02em] text-ui-text">Edit brand</h3>
                       <form
                         className="mt-8 flex flex-col gap-6"
                         onSubmit={async (e) => {
@@ -355,7 +355,7 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
                         </Field>
 
                         {editError ? (
-                          <p className="text-sm text-red-400" role="alert">
+                          <p className="text-sm text-red-700" role="alert">
                             {editError}
                           </p>
                         ) : null}
@@ -364,13 +364,13 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
                           <button
                             type="submit"
                             disabled={pending}
-                            className="w-full rounded-xl bg-helion-accent py-3.5 text-[15px] font-semibold text-helion-on-accent transition hover:bg-helion-accent-hover disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[160px]"
+                            className="w-full rounded-none bg-black py-3.5 text-[15px] font-medium text-white transition hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[160px]"
                           >
                             {pending ? "Saving…" : "Save changes"}
                           </button>
                           <button
                             type="button"
-                            className="rounded-xl py-3 text-[15px] font-medium text-helion-muted transition hover:text-helion-text"
+                            className="rounded-none py-3 text-[15px] font-medium text-ui-muted transition hover:text-ui-text"
                             onClick={() => {
                               setEditError(null);
                               setEditingId(null);
@@ -382,22 +382,22 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
                       </form>
                     </div>
                   ) : (
-                    <div className="rounded-2xl border border-white/10 bg-helion-surface/70 px-5 py-5 sm:px-6">
+                    <div className="border-b border-black py-8">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div className="min-w-0">
-                          <h3 className="text-[17px] font-semibold text-white">{brand.name}</h3>
+                          <h3 className="text-lg font-medium tracking-[-0.02em] text-ui-text">{brand.name}</h3>
                           {brand.description ? (
-                            <p className="mt-2 text-sm leading-relaxed text-helion-muted">
+                            <p className="mt-2 text-sm leading-relaxed text-ui-muted">
                               {brand.description}
                             </p>
                           ) : (
-                            <p className="mt-2 text-sm text-helion-muted-dim">No description yet</p>
+                            <p className="mt-2 text-sm text-ui-muted-dim">No description yet</p>
                           )}
                         </div>
                         <div className="flex shrink-0 gap-2 sm:flex-col sm:items-end">
                           <button
                             type="button"
-                            className="rounded-xl border border-white/15 px-4 py-2.5 text-sm font-medium text-helion-text transition hover:bg-white/5"
+                            className="border border-black px-4 py-2.5 text-sm font-medium text-ui-text transition hover:bg-neutral-50"
                             onClick={() => {
                               setListError(null);
                               setEditError(null);
@@ -434,7 +434,7 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
                             <button
                               type="submit"
                               disabled={pending}
-                              className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-red-400/90 transition hover:bg-red-500/10 disabled:opacity-60"
+                              className="w-full rounded-none px-4 py-2.5 text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-60"
                             >
                               Remove
                             </button>

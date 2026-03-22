@@ -2,36 +2,66 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main className="mx-auto flex max-w-2xl flex-1 flex-col gap-14 px-4 py-16 sm:px-6 lg:max-w-3xl lg:py-20">
-      <section className="flex flex-col gap-6">
-        <h1 className="text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
+    <main className="flex w-full min-w-0 flex-1 flex-col">
+      <section className="w-full max-w-4xl">
+        <p className="text-[10px] font-medium uppercase tracking-[0.35em] text-ui-muted-dim">Helion Media</p>
+        <h1 className="mt-5 text-[1.75rem] font-medium leading-[1.08] tracking-[-0.03em] text-ui-text sm:mt-6 sm:text-4xl md:text-5xl lg:text-6xl">
           Social posts that sound like you.
         </h1>
-        <p className="text-lg leading-relaxed text-helion-muted">
+        <p className="mt-6 max-w-xl text-base leading-relaxed text-ui-muted sm:mt-8 sm:text-lg">
           Tell us about your brand once. Then get ideas, captions, and more — ready to copy and use.
         </p>
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <Link
-            href="/signup"
-            className="inline-flex items-center justify-center rounded-xl bg-helion-accent px-6 py-3.5 text-[15px] font-semibold text-helion-on-accent transition hover:bg-helion-accent-hover"
-          >
-            Get started free
-          </Link>
-          <Link
-            href="/login"
-            className="inline-flex items-center justify-center rounded-xl border border-white/15 px-6 py-3.5 text-[15px] font-medium text-helion-text transition hover:border-white/25 hover:bg-white/5"
-          >
-            I already have an account
-          </Link>
-        </div>
       </section>
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-helion-surface/70 p-6 sm:p-8">
-        <h2 className="text-base font-semibold text-helion-text">How it works</h2>
-        <ol className="list-decimal space-y-3 pl-5 text-sm leading-relaxed text-helion-muted">
-          <li>Add your business name and how you like to sound.</li>
-          <li>Create posts with help from AI.</li>
-          <li>Save what you like and come back anytime.</li>
+      <nav
+        className="mt-12 w-full border-t border-black sm:mt-16 lg:mt-24"
+        aria-label="Get started"
+      >
+        <Link
+          href="/signup"
+          className="group flex min-h-[56px] items-center justify-between gap-4 border-b border-black py-4 transition-colors hover:bg-neutral-50 sm:min-h-[64px] sm:gap-6 sm:py-6"
+        >
+          <span className="min-w-0 text-base font-medium tracking-tight text-ui-text sm:text-lg md:text-xl">
+            Get started free
+          </span>
+          <span
+            className="shrink-0 text-2xl font-extralight text-ui-muted transition-colors group-hover:text-ui-text sm:text-3xl"
+            aria-hidden
+          >
+            ›
+          </span>
+        </Link>
+        <Link
+          href="/login"
+          className="group flex min-h-[56px] items-center justify-between gap-4 border-b border-black py-4 transition-colors hover:bg-neutral-50 sm:min-h-[64px] sm:gap-6 sm:py-6"
+        >
+          <span className="min-w-0 text-base font-medium tracking-tight text-ui-text sm:text-lg md:text-xl">
+            I already have an account
+          </span>
+          <span
+            className="shrink-0 text-2xl font-extralight text-ui-muted transition-colors group-hover:text-ui-text sm:text-3xl"
+            aria-hidden
+          >
+            ›
+          </span>
+        </Link>
+      </nav>
+
+      <section className="mt-16 w-full max-w-xl border-t border-black pt-12 sm:mt-20 sm:pt-16 lg:mt-28">
+        <h2 className="text-[10px] font-medium uppercase tracking-[0.35em] text-ui-muted-dim">How it works</h2>
+        <ol className="mt-6 space-y-5 text-sm leading-relaxed text-ui-muted sm:mt-8 sm:space-y-6 sm:text-base">
+          <li className="flex gap-3 border-b border-black/10 pb-5 sm:gap-4 sm:pb-6">
+            <span className="shrink-0 font-medium tabular-nums text-ui-text">01</span>
+            <span className="min-w-0">Add your business name and how you like to sound.</span>
+          </li>
+          <li className="flex gap-3 border-b border-black/10 pb-5 sm:gap-4 sm:pb-6">
+            <span className="shrink-0 font-medium tabular-nums text-ui-text">02</span>
+            <span className="min-w-0">Create posts with help from AI.</span>
+          </li>
+          <li className="flex gap-3 sm:gap-4">
+            <span className="shrink-0 font-medium tabular-nums text-ui-text">03</span>
+            <span className="min-w-0">Save what you like and come back anytime.</span>
+          </li>
         </ol>
       </section>
     </main>

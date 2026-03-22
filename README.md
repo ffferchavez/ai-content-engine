@@ -44,24 +44,44 @@ cp .env.example .env.local
 
 Optional for server-only tasks:
 
+- **`DATABASE_URL`** — Postgres connection URI (see below) for `npm run db:migrate`  
 - **`SUPABASE_SERVICE_ROLE_KEY`** — do not expose to the browser  
 - **`OPENAI_API_KEY`** — required when you implement `POST /api/generate` (Phase 4)
 
+Validate public env vars after editing `.env.local`:
+
+```bash
+npm run verify:env
+```
+
 ### 3. Database migration
 
-Apply the SQL in `supabase/migrations/20250322000000_initial_schema.sql`
+Apply the SQL in `supabase/migrations/20250322000000_initial_schema.sql` using **one** of:
 
-- **Supabase Dashboard → SQL Editor:** paste and run the file contents, or  
-- **Supabase CLI:** `supabase db push` / `supabase migration up` (if you use the CLI locally)
+**A. SQL Editor (dashboard)** — paste the full file and run.
+
+**B. CLI from this repo** — add **`DATABASE_URL`** to `.env.local` (Supabase **Settings → Database → Connection string → URI**, include the password), then:
+
+```bash
+npm run db:migrate
+```
 
 This creates tables, RLS policies, the `auth.users` → profile + default org bootstrap trigger, and the `create_organization_with_owner` RPC.
 
 ### 4. Supabase Auth URLs
 
-In **Authentication → URL Configuration**:
+In **Authentication → URL Configuration** (must match your local origin):
 
 - **Site URL:** `http://localhost:3000` (and production URL when deployed)  
 - **Redirect URLs:** include `http://localhost:3000/auth/callback` (and production equivalent)
+
+Without these, email confirmation and OAuth redirects may fail.
+
+Print the exact values from your `.env.local` `NEXT_PUBLIC_APP_URL`:
+
+```bash
+npm run auth:urls
+```
 
 ### 5. Run the dev server
 
@@ -71,6 +91,14 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+### Manual steps in the Supabase Dashboard (you)
+
+These cannot be automated from this repo without your database password or a Supabase access token:
+
+1. **Apply the schema** if you have not already: **SQL Editor** → paste all of [`supabase/migrations/20250322000000_initial_schema.sql`](supabase/migrations/20250322000000_initial_schema.sql) → Run.  
+   Or add **`DATABASE_URL`** to `.env.local` and run `npm run db:migrate`.
+2. **Auth URLs:** **Authentication → URL Configuration** — use `npm run auth:urls` and copy Site URL + redirect into the dashboard.
+
 ## Scripts
 
 | Command | Description |
@@ -79,6 +107,9 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run build` | Production build |
 | `npm run start` | Start production server |
 | `npm run lint` | ESLint |
+| `npm run verify:env` | Check `NEXT_PUBLIC_*` Supabase vars in `.env.local` |
+| `npm run db:migrate` | Apply `supabase/migrations/*.sql` via `DATABASE_URL` |
+| `npm run auth:urls` | Print Site URL and `/auth/callback` for Supabase Auth settings |
 
 ## Project structure
 

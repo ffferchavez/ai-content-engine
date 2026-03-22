@@ -7,38 +7,6 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ---------------------------------------------------------------------------
--- Helper functions (RLS)
--- ---------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.is_org_member(org_id uuid)
-RETURNS boolean
-LANGUAGE sql
-STABLE
-SECURITY INVOKER
-SET search_path = public
-AS $$
-  SELECT EXISTS (
-    SELECT 1
-    FROM public.organization_members m
-    WHERE m.organization_id = org_id
-      AND m.user_id = auth.uid()
-  );
-$$;
-
-CREATE OR REPLACE FUNCTION public.org_role(org_id uuid)
-RETURNS text
-LANGUAGE sql
-STABLE
-SECURITY INVOKER
-SET search_path = public
-AS $$
-  SELECT m.role
-  FROM public.organization_members m
-  WHERE m.organization_id = org_id
-    AND m.user_id = auth.uid()
-  LIMIT 1;
-$$;
-
--- ---------------------------------------------------------------------------
 -- profiles
 -- ---------------------------------------------------------------------------
 CREATE TABLE public.profiles (
@@ -80,6 +48,38 @@ CREATE TABLE public.organization_members (
 
 CREATE INDEX organization_members_user_id_idx ON public.organization_members (user_id);
 CREATE INDEX organization_members_org_id_idx ON public.organization_members (organization_id);
+
+-- ---------------------------------------------------------------------------
+-- Helper functions (RLS) — after organization_members exists
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.is_org_member(org_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.organization_members m
+    WHERE m.organization_id = org_id
+      AND m.user_id = auth.uid()
+  );
+$$;
+
+CREATE OR REPLACE FUNCTION public.org_role(org_id uuid)
+RETURNS text
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+SET search_path = public
+AS $$
+  SELECT m.role
+  FROM public.organization_members m
+  WHERE m.organization_id = org_id
+    AND m.user_id = auth.uid()
+  LIMIT 1;
+$$;
 
 -- ---------------------------------------------------------------------------
 -- brands

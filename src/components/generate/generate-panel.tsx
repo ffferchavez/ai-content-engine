@@ -78,9 +78,9 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
 
   if (brands.length === 0) {
     return (
-      <div className="rounded-2xl border border-amber-500/25 bg-zinc-900/50 p-6">
-        <p className="text-sm leading-relaxed text-amber-200/90">
-          Add a brand first under <span className="text-zinc-200">Brands</span>, then come back here to
+      <div className="rounded-2xl border border-helion-accent/25 bg-helion-surface/90 p-6">
+        <p className="text-sm leading-relaxed text-helion-warning/90">
+          Add a brand first under <span className="text-helion-text">Brands</span>, then come back here to
           create posts.
         </p>
       </div>
@@ -88,16 +88,16 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
   }
 
   const fieldClass =
-    "w-full rounded-xl border border-white/10 bg-zinc-900/80 px-4 py-3 text-[15px] text-zinc-100 outline-none focus:border-amber-500/40 focus:ring-2 focus:ring-amber-500/20";
+    "w-full rounded-xl border border-white/10 bg-helion-surface px-4 py-3 text-[15px] text-helion-text outline-none focus:border-helion-accent/40 focus:ring-2 focus:ring-helion-accent/25";
 
   return (
     <div className="flex flex-col gap-10">
       <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-6">
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">1. Brand</h2>
-          <p className="mt-1 text-sm text-zinc-500">Who is this post for?</p>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-helion-muted-dim">1. Brand</h2>
+          <p className="mt-1 text-sm text-helion-muted-dim">Who is this post for?</p>
           <div className="mt-3 flex flex-col gap-1.5">
-            <label htmlFor="gen-brand" className="text-[15px] font-medium text-zinc-200">
+            <label htmlFor="gen-brand" className="text-[15px] font-medium text-helion-text">
               Brand
             </label>
             <select
@@ -120,10 +120,10 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
         </div>
 
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">2. Topic</h2>
-          <p className="mt-1 text-sm text-zinc-500">Ideas, hooks, and captions will follow this brief.</p>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-helion-muted-dim">2. Topic</h2>
+          <p className="mt-1 text-sm text-helion-muted-dim">Ideas, hooks, and captions will follow this brief.</p>
           <div className="mt-3 flex flex-col gap-1.5">
-            <label htmlFor="gen-topic" className="text-[15px] font-medium text-zinc-200">
+            <label htmlFor="gen-topic" className="text-[15px] font-medium text-helion-text">
               What do you want to post about?
             </label>
             <textarea
@@ -139,10 +139,10 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
         </div>
 
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">3. Style (optional)</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-helion-muted-dim">3. Style (optional)</h2>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="gen-tone" className="text-[15px] font-medium text-zinc-200">
+              <label htmlFor="gen-tone" className="text-[15px] font-medium text-helion-text">
                 Tone
               </label>
               <select
@@ -162,7 +162,7 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
               </select>
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="gen-platform" className="text-[15px] font-medium text-zinc-200">
+              <label htmlFor="gen-platform" className="text-[15px] font-medium text-helion-text">
                 Platform (optional)
               </label>
               <input
@@ -186,18 +186,18 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-xl bg-amber-500 py-3.5 text-[15px] font-semibold text-zinc-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[220px] sm:px-10"
+          className="w-full rounded-xl bg-helion-accent py-3.5 text-[15px] font-semibold text-helion-on-accent transition hover:bg-helion-accent-hover disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[220px] sm:px-10"
         >
           {pending ? "Creating…" : "Generate pack"}
         </button>
       </form>
 
       {summary ? (
-        <section className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6">
+        <section className="rounded-2xl border border-white/10 bg-helion-surface/70 p-6">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h2 className="text-sm font-medium text-zinc-500">Overview</h2>
-              <p className="mt-2 text-base leading-relaxed text-zinc-200">{summary}</p>
+              <h2 className="text-sm font-medium text-helion-muted-dim">Overview</h2>
+              <p className="mt-2 text-base leading-relaxed text-helion-text">{summary}</p>
             </div>
             <CopyButton text={summary} label="Copy overview" />
           </div>
@@ -208,15 +208,15 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
         <section className="flex flex-col gap-4">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-zinc-50">Ideas &amp; copy</h2>
-              <p className="mt-1 text-sm text-zinc-500">
+              <h2 className="text-lg font-semibold text-white">Ideas &amp; copy</h2>
+              <p className="mt-1 text-sm text-helion-muted-dim">
                 Post ideas, hooks, captions, CTAs, hashtags, and a prompt — copy any block.
               </p>
             </div>
             <button
               type="button"
               onClick={regenerateAnother}
-              className="rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-zinc-300 transition hover:bg-white/5"
+              className="rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5"
             >
               New pack (same form)
             </button>
@@ -235,8 +235,8 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
               />
             ))}
           </ul>
-          <p className="text-sm text-zinc-500">
-            Saved automatically — view anytime under <span className="text-zinc-400">Saved</span>.
+          <p className="text-sm text-helion-muted-dim">
+            Saved automatically — view anytime under <span className="text-helion-muted">Saved</span>.
           </p>
         </section>
       ) : null}

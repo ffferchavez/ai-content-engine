@@ -18,8 +18,8 @@ export default async function LibraryDetailPage({ params }: PageProps) {
   if (!orgId) {
     return (
       <div className="flex flex-col gap-3">
-        <p className="text-sm text-amber-200/90">We couldn&apos;t load your workspace.</p>
-        <Link href="/library" className="text-sm text-amber-400 hover:text-amber-300">
+        <p className="text-sm text-helion-warning/90">We couldn&apos;t load your workspace.</p>
+        <Link href="/library" className="text-sm text-helion-accent hover:text-helion-accent-hover">
           ← Back to Saved
         </Link>
       </div>
@@ -73,12 +73,12 @@ export default async function LibraryDetailPage({ params }: PageProps) {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <Link href="/library" className="text-sm text-zinc-500 transition hover:text-zinc-300">
+        <Link href="/library" className="text-sm text-helion-muted-dim transition hover:text-helion-text">
           ← Saved
         </Link>
-        <p className="mt-4 text-xs text-zinc-500">{when}</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-50">{topic}</h1>
-        <p className="mt-1 text-sm text-zinc-400">
+        <p className="mt-4 text-xs text-helion-muted-dim">{when}</p>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">{topic}</h1>
+        <p className="mt-1 text-sm text-helion-muted">
           {brandName}
           {tone ? ` · ${tone}` : ""}
           {platform ? ` · ${platform}` : ""}
@@ -92,7 +92,7 @@ export default async function LibraryDetailPage({ params }: PageProps) {
 
       {assets.length > 0 ? (
         <section>
-          <h2 className="text-lg font-semibold text-zinc-50">Ideas &amp; copy</h2>
+          <h2 className="text-lg font-semibold text-white">Ideas &amp; copy</h2>
           <ul className="mt-4 flex flex-col gap-3">
             {assets.map((a) => (
               <AssetBlock
@@ -109,12 +109,12 @@ export default async function LibraryDetailPage({ params }: PageProps) {
           </ul>
         </section>
       ) : gen.status === "completed" ? (
-        <p className="text-sm text-zinc-500">No pieces stored for this run.</p>
+        <p className="text-sm text-helion-muted-dim">No pieces stored for this run.</p>
       ) : null}
 
       <Link
         href="/generate"
-        className="inline-flex w-fit rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-zinc-300 transition hover:bg-white/5"
+        className="inline-flex w-fit rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5"
       >
         Create another pack
       </Link>

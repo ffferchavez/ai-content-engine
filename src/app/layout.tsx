@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const geistMono = Geist_Mono({
@@ -14,11 +15,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "AI Content Engine · Helion Media",
+    default: "Helion Media · AI Content",
     template: "%s · Helion Media",
   },
   description:
-    "Create social posts that match your brand. Simple setup, AI-assisted ideas and captions.",
+    "Create social posts that match your brand. From Helion City — intelligent systems for your business.",
 };
 
 export default function RootLayout({
@@ -30,10 +31,10 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${plusJakarta.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body
-        className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100"
+        className="flex min-h-screen flex-col text-helion-text"
         suppressHydrationWarning
       >
         {children}

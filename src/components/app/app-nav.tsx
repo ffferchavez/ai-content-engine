@@ -19,8 +19,8 @@ function isActive(pathname: string, href: string) {
 
 function navLinkClass(active: boolean) {
   return active
-    ? "bg-white/10 text-white"
-    : "text-zinc-400 hover:bg-white/5 hover:text-zinc-100";
+    ? "bg-helion-accent/15 text-helion-accent shadow-sm"
+    : "text-helion-muted hover:bg-white/5 hover:text-helion-text";
 }
 
 export function AppNav() {
@@ -29,7 +29,7 @@ export function AppNav() {
   return (
     <>
       <nav
-        className="hidden items-center gap-0.5 rounded-full border border-white/10 bg-zinc-900/60 p-0.5 md:flex"
+        className="hidden items-center gap-0.5 rounded-full border border-white/10 bg-helion-surface/80 p-0.5 md:flex"
         aria-label="Main"
       >
         {primaryNav.map((item) => {
@@ -47,7 +47,7 @@ export function AppNav() {
       </nav>
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-40 flex items-stretch justify-around border-t border-white/10 bg-zinc-950/95 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-40 flex items-stretch justify-around border-t border-white/10 bg-helion-elevated/98 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md md:hidden"
         aria-label="Main"
       >
         {primaryNav.map((item) => {
@@ -56,7 +56,7 @@ export function AppNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex min-h-[3.25rem] flex-1 flex-col items-center justify-center px-1 text-sm font-medium transition ${active ? "text-amber-400" : "text-zinc-500"}`}
+              className={`flex min-h-[3.25rem] flex-1 flex-col items-center justify-center px-1 text-sm font-medium transition ${active ? "text-helion-accent" : "text-helion-muted-dim"}`}
             >
               {item.label}
             </Link>

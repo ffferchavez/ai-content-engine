@@ -43,7 +43,7 @@ export function SignupForm() {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="fullName" className="text-[15px] font-medium text-zinc-200">
+        <label htmlFor="fullName" className="text-[15px] font-medium text-helion-text">
           Your name
         </label>
         <input
@@ -53,12 +53,12 @@ export function SignupForm() {
           autoComplete="name"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
-          className="w-full rounded-xl border border-white/10 bg-zinc-900/80 px-4 py-3 text-[15px] text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-amber-500/40 focus:ring-2 focus:ring-amber-500/20"
+          className="w-full rounded-xl border border-white/10 bg-helion-surface px-4 py-3 text-[15px] text-helion-text outline-none placeholder:text-helion-muted-dim focus:border-helion-accent/40 focus:ring-2 focus:ring-helion-accent/25"
           placeholder="Alex Rivera"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-[15px] font-medium text-zinc-200">
+        <label htmlFor="email" className="text-[15px] font-medium text-helion-text">
           Email
         </label>
         <input
@@ -69,12 +69,12 @@ export function SignupForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-xl border border-white/10 bg-zinc-900/80 px-4 py-3 text-[15px] text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-amber-500/40 focus:ring-2 focus:ring-amber-500/20"
+          className="w-full rounded-xl border border-white/10 bg-helion-surface px-4 py-3 text-[15px] text-helion-text outline-none placeholder:text-helion-muted-dim focus:border-helion-accent/40 focus:ring-2 focus:ring-helion-accent/25"
           placeholder="you@company.com"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-[15px] font-medium text-zinc-200">
+        <label htmlFor="password" className="text-[15px] font-medium text-helion-text">
           Password
         </label>
         <input
@@ -86,9 +86,9 @@ export function SignupForm() {
           minLength={8}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-xl border border-white/10 bg-zinc-900/80 px-4 py-3 text-[15px] text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-amber-500/40 focus:ring-2 focus:ring-amber-500/20"
+          className="w-full rounded-xl border border-white/10 bg-helion-surface px-4 py-3 text-[15px] text-helion-text outline-none placeholder:text-helion-muted-dim focus:border-helion-accent/40 focus:ring-2 focus:ring-helion-accent/25"
         />
-        <p className="text-xs text-zinc-600">At least 8 characters.</p>
+        <p className="text-xs text-helion-muted-dim">At least 8 characters.</p>
       </div>
       {error ? (
         <p className="text-sm text-red-400" role="alert">
@@ -103,13 +103,13 @@ export function SignupForm() {
       <button
         type="submit"
         disabled={pending}
-        className="mt-1 w-full rounded-xl bg-amber-500 py-3.5 text-[15px] font-semibold text-zinc-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-1 w-full rounded-xl bg-helion-accent py-3.5 text-[15px] font-semibold text-helion-on-accent transition hover:bg-helion-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending ? "Creating account…" : "Create account"}
       </button>
-      <p className="text-center text-sm text-zinc-500">
+      <p className="text-center text-sm text-helion-muted-dim">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-amber-400 hover:text-amber-300">
+        <Link href="/login" className="font-medium text-helion-accent hover:text-helion-accent-hover">
           Log in
         </Link>
       </p>

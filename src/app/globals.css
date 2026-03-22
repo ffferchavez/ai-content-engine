@@ -1,19 +1,53 @@
 @import "tailwindcss";
 
+/* Helion City–aligned design system: deep navy base, solar gold accent, clean enterprise type */
 :root {
-  --background: #09090b;
-  --foreground: #fafafa;
+  --helion-bg: #070b14;
+  --helion-bg-elevated: #0c1222;
+  --helion-surface: #111b2e;
+  --helion-surface-hover: #162236;
+  --helion-border: rgba(148, 163, 184, 0.12);
+  --helion-border-strong: rgba(148, 163, 184, 0.22);
+  --helion-accent: #e5a623;
+  --helion-accent-hover: #f0c04a;
+  --helion-accent-subtle: rgba(229, 166, 35, 0.12);
+  --helion-on-accent: #0a0e18;
+  --helion-text: #f1f5f9;
+  --helion-muted: #94a3b8;
+  --helion-muted-dim: #64748b;
+  --helion-warning: #fcd34d;
+  --helion-warning-bg: rgba(251, 191, 36, 0.08);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-background: var(--helion-bg);
+  --color-foreground: var(--helion-text);
+  --color-helion-bg: var(--helion-bg);
+  --color-helion-text: var(--helion-text);
+  --color-helion-elevated: var(--helion-bg-elevated);
+  --color-helion-surface: var(--helion-surface);
+  --color-helion-surface-hover: var(--helion-surface-hover);
+  --color-helion-accent: var(--helion-accent);
+  --color-helion-accent-hover: var(--helion-accent-hover);
+  --color-helion-on-accent: var(--helion-on-accent);
+  --color-helion-muted: var(--helion-muted);
+  --color-helion-muted-dim: var(--helion-muted-dim);
+  --color-helion-warning: var(--helion-warning);
+  --font-sans: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  background-color: var(--helion-bg);
+  color: var(--helion-text);
+  font-family: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
+  background-image:
+    radial-gradient(ellipse 100% 60% at 50% -15%, rgba(229, 166, 35, 0.06), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 100% 0%, rgba(56, 189, 248, 0.03), transparent 45%);
+  background-attachment: fixed;
+}
+
+::selection {
+  background: rgba(229, 166, 35, 0.25);
+  color: var(--helion-text);
 }

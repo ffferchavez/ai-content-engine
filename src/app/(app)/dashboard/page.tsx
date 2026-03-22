@@ -47,26 +47,26 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-col gap-10">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-50 sm:text-3xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
           Hi, {displayName}
         </h1>
-        <p className="mt-4 text-base leading-relaxed text-zinc-400">
+        <p className="mt-4 text-base leading-relaxed text-helion-muted">
           Set up your brand, create a pack, then copy from Saved anytime.
         </p>
         {orgCtx ? (
           <div className="mt-6 flex flex-wrap gap-3">
-            <div className="rounded-xl border border-white/10 bg-zinc-900/50 px-4 py-3">
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Brands</p>
-              <p className="mt-1 text-2xl font-semibold text-zinc-100">{brandCount}</p>
+            <div className="rounded-xl border border-white/10 bg-helion-surface/90 px-4 py-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-helion-muted-dim">Brands</p>
+              <p className="mt-1 text-2xl font-semibold text-helion-text">{brandCount}</p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-zinc-900/50 px-4 py-3">
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Saved packs</p>
-              <p className="mt-1 text-2xl font-semibold text-zinc-100">{savedCount}</p>
+            <div className="rounded-xl border border-white/10 bg-helion-surface/90 px-4 py-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-helion-muted-dim">Saved packs</p>
+              <p className="mt-1 text-2xl font-semibold text-helion-text">{savedCount}</p>
             </div>
           </div>
         ) : null}
         {!orgCtx ? (
-          <p className="mt-4 text-sm leading-relaxed text-amber-200/90" role="status">
+          <p className="mt-4 text-sm leading-relaxed text-helion-warning/90" role="status">
             We couldn&apos;t finish setting up your account. Try signing out and signing in again. If that
             doesn&apos;t help, contact support.
           </p>
@@ -76,36 +76,36 @@ export default async function DashboardPage() {
       <div className="flex flex-col gap-3">
         <Link
           href="/brands"
-          className="rounded-2xl border border-white/10 bg-zinc-900/50 px-6 py-6 transition hover:border-amber-500/30 hover:bg-zinc-900/70"
+          className="rounded-2xl border border-white/10 bg-helion-surface/90 px-6 py-6 transition hover:border-helion-accent/30 hover:bg-helion-surface-hover"
         >
-          <h2 className="text-sm font-medium text-zinc-500">Brands</h2>
-          <p className="mt-2 text-lg font-semibold text-zinc-50">Manage brand profiles</p>
-          <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+          <h2 className="text-sm font-medium text-helion-muted-dim">Brands</h2>
+          <p className="mt-2 text-lg font-semibold text-white">Manage brand profiles</p>
+          <p className="mt-2 text-sm leading-relaxed text-helion-muted">
             Voice and audience — used every time you generate.
           </p>
-          <span className="mt-3 inline-block text-sm font-medium text-amber-400">Open →</span>
+          <span className="mt-3 inline-block text-sm font-medium text-helion-accent">Open →</span>
         </Link>
         <Link
           href="/generate"
-          className="rounded-2xl border border-white/10 bg-zinc-900/50 px-6 py-6 transition hover:border-amber-500/30 hover:bg-zinc-900/70"
+          className="rounded-2xl border border-white/10 bg-helion-surface/90 px-6 py-6 transition hover:border-helion-accent/30 hover:bg-helion-surface-hover"
         >
-          <h2 className="text-sm font-medium text-zinc-500">Create</h2>
-          <p className="mt-2 text-lg font-semibold text-zinc-50">Generate a content pack</p>
-          <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+          <h2 className="text-sm font-medium text-helion-muted-dim">Create</h2>
+          <p className="mt-2 text-lg font-semibold text-white">Generate a content pack</p>
+          <p className="mt-2 text-sm leading-relaxed text-helion-muted">
             Ideas, hooks, captions, CTAs, hashtags, and an image prompt — saved automatically.
           </p>
-          <span className="mt-3 inline-block text-sm font-medium text-amber-400">Open →</span>
+          <span className="mt-3 inline-block text-sm font-medium text-helion-accent">Open →</span>
         </Link>
         <Link
           href="/library"
-          className="rounded-2xl border border-white/10 bg-zinc-900/50 px-6 py-6 transition hover:border-amber-500/30 hover:bg-zinc-900/70"
+          className="rounded-2xl border border-white/10 bg-helion-surface/90 px-6 py-6 transition hover:border-helion-accent/30 hover:bg-helion-surface-hover"
         >
-          <h2 className="text-sm font-medium text-zinc-500">Saved</h2>
-          <p className="mt-2 text-lg font-semibold text-zinc-50">Copy past packs</p>
-          <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+          <h2 className="text-sm font-medium text-helion-muted-dim">Saved</h2>
+          <p className="mt-2 text-lg font-semibold text-white">Copy past packs</p>
+          <p className="mt-2 text-sm leading-relaxed text-helion-muted">
             Open any run to see full text and copy buttons.
           </p>
-          <span className="mt-3 inline-block text-sm font-medium text-amber-400">Open →</span>
+          <span className="mt-3 inline-block text-sm font-medium text-helion-accent">Open →</span>
         </Link>
       </div>
     </div>

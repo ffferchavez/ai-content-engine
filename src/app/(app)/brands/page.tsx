@@ -13,8 +13,8 @@ export default async function BrandsPage() {
   if (!orgId) {
     return (
       <div className="flex flex-col gap-3">
-        <h1 className="text-2xl font-semibold text-zinc-50">Brands</h1>
-        <p className="text-sm leading-relaxed text-amber-200/90" role="status">
+        <h1 className="text-2xl font-semibold text-white">Brands</h1>
+        <p className="text-sm leading-relaxed text-helion-warning/90" role="status">
           We couldn&apos;t finish setting up your account. Try signing out and signing in again. If the
           problem continues, contact support.
         </p>
@@ -35,7 +35,7 @@ export default async function BrandsPage() {
     console.error("[brands] list:", error.message);
     return (
       <div className="flex flex-col gap-3">
-        <h1 className="text-2xl font-semibold text-zinc-50">Brands</h1>
+        <h1 className="text-2xl font-semibold text-white">Brands</h1>
         <p className="text-sm text-red-400" role="alert">
           We couldn&apos;t load your brands. Please refresh the page and try again.
         </p>
@@ -54,8 +54,8 @@ export default async function BrandsPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">Brands</h1>
-        <p className="mt-3 text-base leading-relaxed text-zinc-400">
+        <h1 className="text-2xl font-semibold tracking-tight text-white">Brands</h1>
+        <p className="mt-3 text-base leading-relaxed text-helion-muted">
           Add one entry for each business or project. When you create posts, you&apos;ll pick which brand
           to use.
         </p>

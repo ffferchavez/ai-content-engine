@@ -25,17 +25,17 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={htmlFor} className="text-[15px] font-medium text-zinc-200">
+      <label htmlFor={htmlFor} className="text-[15px] font-medium text-helion-text">
         {label}
       </label>
-      {hint ? <p className="text-sm text-zinc-500">{hint}</p> : null}
+      {hint ? <p className="text-sm text-helion-muted-dim">{hint}</p> : null}
       {children}
     </div>
   );
 }
 
 const fieldClass =
-  "w-full rounded-xl border border-white/10 bg-zinc-900/80 px-4 py-3 text-[15px] text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-amber-500/40 focus:ring-2 focus:ring-amber-500/20";
+  "w-full rounded-xl border border-white/10 bg-helion-surface px-4 py-3 text-[15px] text-helion-text outline-none placeholder:text-helion-muted-dim focus:border-helion-accent/40 focus:ring-2 focus:ring-helion-accent/25";
 const textareaClass = `${fieldClass} min-h-[100px] resize-y leading-relaxed`;
 
 const LANG_OPTIONS: { value: string; label: string }[] = [
@@ -70,18 +70,18 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
               setCreateError(null);
               setShowAddForm((v) => !v);
             }}
-            className="mb-6 w-full rounded-2xl border border-dashed border-white/20 bg-zinc-900/40 py-4 text-[15px] font-medium text-zinc-300 transition hover:border-amber-500/40 hover:bg-zinc-900/60 hover:text-zinc-100"
+            className="mb-6 w-full rounded-2xl border border-dashed border-white/20 bg-helion-surface/70 py-4 text-[15px] font-medium text-slate-300 transition hover:border-helion-accent/40 hover:bg-helion-surface/85 hover:text-helion-text"
           >
             {showAddForm ? "Close" : "+ Add another brand"}
           </button>
         ) : null}
 
         {showAddForm || brands.length === 0 ? (
-          <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-6 sm:p-8">
-            <h2 className="text-lg font-semibold text-zinc-50">
+          <div className="rounded-2xl border border-white/10 bg-helion-surface/90 p-6 sm:p-8">
+            <h2 className="text-lg font-semibold text-white">
               {brands.length === 0 ? "Add your first brand" : "New brand"}
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+            <p className="mt-2 text-sm leading-relaxed text-helion-muted-dim">
               Tell us about the business or project. This helps the AI match your voice when you create
               posts.
             </p>
@@ -211,7 +211,7 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
               <button
                 type="submit"
                 disabled={pending}
-                className="w-full rounded-xl bg-amber-500 py-3.5 text-[15px] font-semibold text-zinc-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[200px] sm:px-8"
+                className="w-full rounded-xl bg-helion-accent py-3.5 text-[15px] font-semibold text-helion-on-accent transition hover:bg-helion-accent-hover disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[200px] sm:px-8"
               >
                 {pending ? "Saving…" : "Save brand"}
               </button>
@@ -229,13 +229,13 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
 
         {brands.length === 0 ? null : (
           <>
-            <h2 className="text-lg font-semibold text-zinc-50">Your brands</h2>
+            <h2 className="text-lg font-semibold text-white">Your brands</h2>
             <ul className="flex flex-col gap-3">
               {brands.map((brand) => (
                 <li key={brand.id}>
                   {editingId === brand.id ? (
-                    <div className="rounded-2xl border border-amber-500/30 bg-zinc-900/60 p-6 sm:p-8">
-                      <h3 className="text-lg font-semibold text-zinc-50">Edit brand</h3>
+                    <div className="rounded-2xl border border-helion-accent/30 bg-helion-surface/85 p-6 sm:p-8">
+                      <h3 className="text-lg font-semibold text-white">Edit brand</h3>
                       <form
                         className="mt-8 flex flex-col gap-6"
                         onSubmit={async (e) => {
@@ -364,13 +364,13 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
                           <button
                             type="submit"
                             disabled={pending}
-                            className="w-full rounded-xl bg-amber-500 py-3.5 text-[15px] font-semibold text-zinc-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[160px]"
+                            className="w-full rounded-xl bg-helion-accent py-3.5 text-[15px] font-semibold text-helion-on-accent transition hover:bg-helion-accent-hover disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[160px]"
                           >
                             {pending ? "Saving…" : "Save changes"}
                           </button>
                           <button
                             type="button"
-                            className="rounded-xl py-3 text-[15px] font-medium text-zinc-400 transition hover:text-zinc-200"
+                            className="rounded-xl py-3 text-[15px] font-medium text-helion-muted transition hover:text-helion-text"
                             onClick={() => {
                               setEditError(null);
                               setEditingId(null);
@@ -382,22 +382,22 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
                       </form>
                     </div>
                   ) : (
-                    <div className="rounded-2xl border border-white/10 bg-zinc-900/40 px-5 py-5 sm:px-6">
+                    <div className="rounded-2xl border border-white/10 bg-helion-surface/70 px-5 py-5 sm:px-6">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div className="min-w-0">
-                          <h3 className="text-[17px] font-semibold text-zinc-50">{brand.name}</h3>
+                          <h3 className="text-[17px] font-semibold text-white">{brand.name}</h3>
                           {brand.description ? (
-                            <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+                            <p className="mt-2 text-sm leading-relaxed text-helion-muted">
                               {brand.description}
                             </p>
                           ) : (
-                            <p className="mt-2 text-sm text-zinc-600">No description yet</p>
+                            <p className="mt-2 text-sm text-helion-muted-dim">No description yet</p>
                           )}
                         </div>
                         <div className="flex shrink-0 gap-2 sm:flex-col sm:items-end">
                           <button
                             type="button"
-                            className="rounded-xl border border-white/15 px-4 py-2.5 text-sm font-medium text-zinc-200 transition hover:bg-white/5"
+                            className="rounded-xl border border-white/15 px-4 py-2.5 text-sm font-medium text-helion-text transition hover:bg-white/5"
                             onClick={() => {
                               setListError(null);
                               setEditError(null);

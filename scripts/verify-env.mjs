@@ -15,7 +15,9 @@ if (existsSync(envLocal)) {
 dotenv.config({ path: resolve(root, ".env"), quiet: true });
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+const anon =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY?.trim() ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
 
 const errors = [];
@@ -30,10 +32,13 @@ else if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url))
     "NEXT_PUBLIC_SUPABASE_URL should look like https://<project-ref>.supabase.co",
   );
 
-if (!anon) errors.push("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY");
+if (!anon)
+  errors.push(
+    "Missing NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY",
+  );
 else if (anon === "your_anon_key")
   errors.push(
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY is still the placeholder — paste the anon public key from Supabase Dashboard → Settings → API",
+    "Supabase public key is still the placeholder — paste Publishable or anon key from Supabase Dashboard → Settings → API",
   );
 else if (
   !(
@@ -43,7 +48,7 @@ else if (
   )
 )
   errors.push(
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY looks invalid — paste the anon public key from Supabase Dashboard → Settings → API",
+    "Supabase public key looks invalid — paste Publishable or anon key from Supabase Dashboard → Settings → API",
   );
 
 if (!appUrl) errors.push("Missing NEXT_PUBLIC_APP_URL (e.g. http://localhost:3000)");
@@ -58,3 +63,10 @@ if (errors.length) {
 }
 
 console.log("Environment check passed (NEXT_PUBLIC_* Supabase vars look valid).");
+
+const openai = process.env.OPENAI_API_KEY?.trim();
+if (!openai) {
+  console.warn(
+    "\nOptional: OPENAI_API_KEY is not set — Create / POST /api/generate will return 503 until you add it.\n",
+  );
+}

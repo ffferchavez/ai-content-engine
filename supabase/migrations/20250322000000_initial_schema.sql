@@ -54,31 +54,40 @@ CREATE INDEX organization_members_org_id_idx ON public.organization_members (org
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.is_org_member(org_id uuid)
 RETURNS boolean
-LANGUAGE sql
+LANGUAGE plpgsql
 STABLE
-SECURITY INVOKER
+SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT EXISTS (
+BEGIN
+  SET LOCAL row_security = off;
+  RETURN EXISTS (
     SELECT 1
     FROM public.organization_members m
     WHERE m.organization_id = org_id
       AND m.user_id = auth.uid()
   );
+END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.org_role(org_id uuid)
 RETURNS text
-LANGUAGE sql
+LANGUAGE plpgsql
 STABLE
-SECURITY INVOKER
+SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT m.role
+DECLARE
+  r text;
+BEGIN
+  SET LOCAL row_security = off;
+  SELECT m.role INTO r
   FROM public.organization_members m
   WHERE m.organization_id = org_id
     AND m.user_id = auth.uid()
   LIMIT 1;
+  RETURN r;
+END;
 $$;
 
 -- ---------------------------------------------------------------------------
@@ -283,10 +292,10 @@ CREATE POLICY "Admins can update organization"
   USING (public.org_role(id) IN ('owner', 'admin'))
   WITH CHECK (public.org_role(id) IN ('owner', 'admin'));
 
--- organization_members
+-- organization_members (do not use is_org_member here — it would recurse into RLS)
 CREATE POLICY "Members can view org members"
   ON public.organization_members FOR SELECT
-  USING (public.is_org_member(organization_id));
+  USING (user_id = auth.uid());
 
 -- brands
 CREATE POLICY "Members can view brands"

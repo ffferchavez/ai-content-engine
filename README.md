@@ -39,7 +39,8 @@ cp .env.example .env.local
 ```
 
 - **`NEXT_PUBLIC_SUPABASE_URL`** — Project URL  
-- **`NEXT_PUBLIC_SUPABASE_ANON_KEY`** — `anon` `public` key  
+- **`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`** — Publishable key from the dashboard (`sb_publishable_…`), **or**  
+- **`NEXT_PUBLIC_SUPABASE_ANON_KEY`** — legacy JWT `anon` `public` key (either works; publishable is preferred if your project shows it)  
 - **`NEXT_PUBLIC_APP_URL`** — e.g. `http://localhost:3000` (used for redirects; align with Supabase Auth URL config)
 
 Optional for server-only tasks:
@@ -115,7 +116,7 @@ These cannot be automated from this repo without your database password or a Sup
 
 - `src/app/` — App Router routes (marketing, auth, dashboard)  
 - `src/lib/supabase/` — Browser and server Supabase clients  
-- `src/middleware.ts` — Session refresh + protected route redirects  
+- `src/proxy.ts` — Session refresh + protected route redirects (Next.js 16 “Proxy” convention; replaces `middleware.ts`)  
 - `supabase/migrations/` — Postgres schema and RLS  
 
 ## License

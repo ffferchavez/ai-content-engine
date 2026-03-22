@@ -1,14 +1,14 @@
 export const metadata = {
-  title: "Settings · AI Content Engine",
+  title: "Account",
 };
 
 export default function SettingsPlaceholderPage() {
   return (
-    <div className="flex flex-col gap-2">
-      <h1 className="text-2xl font-semibold text-zinc-50">Settings</h1>
-      <p className="text-sm text-zinc-500">
-        Profile and organization preferences expand in Phase 5 — this page is
-        wired in the shell for navigation consistency.
+    <div className="flex flex-col gap-4">
+      <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">Account</h1>
+      <p className="text-base leading-relaxed text-zinc-400">
+        More account options will be here later. For now, use{" "}
+        <span className="text-zinc-300">Log out</span> in the top corner if you need to switch users.
       </p>
     </div>
   );

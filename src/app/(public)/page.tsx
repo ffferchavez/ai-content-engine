@@ -2,74 +2,37 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main className="mx-auto flex max-w-6xl flex-1 flex-col gap-16 px-4 py-16 sm:px-6 lg:py-24">
+    <main className="mx-auto flex max-w-2xl flex-1 flex-col gap-14 px-4 py-16 sm:px-6 lg:max-w-3xl lg:py-20">
       <section className="flex flex-col gap-6">
-        <p className="text-sm font-medium uppercase tracking-widest text-amber-400/90">
-          Helion Media · SaaS MVP
-        </p>
-        <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl">
-          Structured social content packs, aligned to your brand.
+        <h1 className="text-3xl font-semibold leading-tight tracking-tight text-zinc-50 sm:text-4xl">
+          Social posts that sound like you.
         </h1>
-        <p className="max-w-2xl text-lg leading-relaxed text-zinc-400">
-          Define a brand profile once, then generate reusable packs with post
-          ideas, hooks, captions, CTAs, hashtags, and optional image prompts —
-          multi-platform, multi-tone, and multi-language ready.
+        <p className="text-lg leading-relaxed text-zinc-400">
+          Tell us about your brand once. Then get ideas, captions, and more — ready to copy and use.
         </p>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link
             href="/signup"
-            className="inline-flex items-center justify-center rounded-lg bg-amber-500 px-5 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-amber-400"
+            className="inline-flex items-center justify-center rounded-xl bg-amber-500 px-6 py-3.5 text-[15px] font-semibold text-zinc-950 transition hover:bg-amber-400"
           >
-            Start free
+            Get started free
           </Link>
           <Link
             href="/login"
-            className="inline-flex items-center justify-center rounded-lg border border-white/15 px-5 py-2.5 text-sm font-medium text-zinc-200 transition hover:border-white/25 hover:bg-white/5"
+            className="inline-flex items-center justify-center rounded-xl border border-white/15 px-6 py-3.5 text-[15px] font-medium text-zinc-200 transition hover:border-white/25 hover:bg-white/5"
           >
-            Sign in
+            I already have an account
           </Link>
         </div>
       </section>
 
-      <section className="grid gap-6 sm:grid-cols-3">
-        {[
-          {
-            title: "Brand-safe outputs",
-            body: "Keep voice, audience, and guidelines attached to every generation run.",
-          },
-          {
-            title: "Normalized storage",
-            body: "Inputs and assets live in Postgres — ready for history, search, and future approvals.",
-          },
-          {
-            title: "Org-ready",
-            body: "Workspaces and RLS lay the groundwork for teams, metering, and subscriptions.",
-          },
-        ].map((card) => (
-          <div
-            key={card.title}
-            className="rounded-xl border border-white/10 bg-zinc-900/40 p-5"
-          >
-            <h2 className="text-sm font-semibold text-zinc-100">{card.title}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-zinc-500">
-              {card.body}
-            </p>
-          </div>
-        ))}
-      </section>
-
-      <section className="rounded-2xl border border-dashed border-white/15 bg-zinc-900/30 p-8">
-        <h2 className="text-lg font-semibold text-zinc-100">What ships in v1</h2>
-        <ul className="mt-4 grid gap-2 text-sm text-zinc-400 sm:grid-cols-2">
-          <li>Marketing site & authentication</li>
-          <li>Dashboard & brand profiles</li>
-          <li>Generation form & structured packs</li>
-          <li>Content library & settings</li>
-        </ul>
-        <p className="mt-4 text-xs text-zinc-600">
-          No direct posting, scheduling, or billing — intentional scope for a
-          lean production MVP.
-        </p>
+      <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-zinc-900/40 p-6 sm:p-8">
+        <h2 className="text-base font-semibold text-zinc-100">How it works</h2>
+        <ol className="list-decimal space-y-3 pl-5 text-sm leading-relaxed text-zinc-400">
+          <li>Add your business name and how you like to sound.</li>
+          <li>Create posts with help from AI.</li>
+          <li>Save what you like and come back anytime.</li>
+        </ol>
       </section>
     </main>
   );

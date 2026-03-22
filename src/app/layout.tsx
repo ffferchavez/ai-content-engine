@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s · Helion Media",
   },
   description:
-    "Structured AI social content packs for Helion City — brand profiles, multi-platform generation, and org-scoped history.",
+    "Create social posts that match your brand. Simple setup, AI-assisted ideas and captions.",
 };
 
 export default function RootLayout({
@@ -29,9 +29,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
+      <body
+        className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

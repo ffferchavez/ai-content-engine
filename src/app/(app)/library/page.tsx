@@ -1,22 +1,143 @@
+import Link from "next/link";
+import { getCurrentOrganizationId } from "@/lib/org";
+import { createClient } from "@/lib/supabase/server";
+
 export const metadata = {
-  title: "Library · AI Content Engine",
+  title: "Saved",
 };
 
-export default function LibraryPlaceholderPage() {
+export default async function LibraryPage() {
+  const orgId = await getCurrentOrganizationId();
+
+  if (!orgId) {
+    return (
+      <div className="flex flex-col gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">Saved</h1>
+        <p className="text-sm text-amber-200/90" role="status">
+          We couldn&apos;t load your workspace. Try signing out and back in.
+        </p>
+      </div>
+    );
+  }
+
+  const supabase = await createClient();
+  const { data: gens, error } = await supabase
+    .from("content_generations")
+    .select("id, brand_id, created_at, status, input_payload, output_summary, error_message")
+    .eq("organization_id", orgId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (error) {
+    console.error("[library] list:", error.message);
+    return (
+      <div className="flex flex-col gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">Saved</h1>
+        <p className="text-sm text-red-400" role="alert">
+          Could not load saved posts. Refresh and try again.
+        </p>
+      </div>
+    );
+  }
+
+  const rows = gens ?? [];
+
+  const brandIds = [...new Set(rows.map((r) => r.brand_id).filter((id): id is string => Boolean(id)))];
+  const brandNames: Record<string, string> = {};
+  if (brandIds.length > 0) {
+    const { data: brandRows } = await supabase.from("brands").select("id, name").in("id", brandIds);
+    for (const b of brandRows ?? []) {
+      brandNames[b.id] = b.name;
+    }
+  }
+
+  const ids = rows.map((r) => r.id);
+  const assetCounts: Record<string, number> = {};
+  if (ids.length > 0) {
+    const { data: counts } = await supabase
+      .from("generated_assets")
+      .select("content_generation_id")
+      .in("content_generation_id", ids);
+
+    for (const row of counts ?? []) {
+      const id = row.content_generation_id as string;
+      assetCounts[id] = (assetCounts[id] ?? 0) + 1;
+    }
+  }
+
   return (
-    <div className="flex flex-col gap-2">
-      <h1 className="text-2xl font-semibold text-zinc-50">Content library</h1>
-      <p className="text-sm text-zinc-500">
-        History and detail views for past runs ship in Phases 3–4, backed by{" "}
-        <code className="rounded bg-white/5 px-1 py-0.5 text-xs text-amber-200/90">
-          content_generations
-        </code>{" "}
-        and{" "}
-        <code className="rounded bg-white/5 px-1 py-0.5 text-xs text-amber-200/90">
-          generated_assets
-        </code>
-        .
-      </p>
+    <div className="flex flex-col gap-8">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">Saved</h1>
+        <p className="mt-3 text-base leading-relaxed text-zinc-400">
+          Past generations for your workspace. Copy anything you still want to use.
+        </p>
+      </div>
+
+      {rows.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-white/15 bg-zinc-900/40 px-6 py-10 text-center">
+          <p className="text-sm text-zinc-500">
+            Nothing saved yet.{" "}
+            <Link href="/generate" className="font-medium text-amber-400 hover:text-amber-300">
+              Create a post
+            </Link>{" "}
+            to see it here.
+          </p>
+        </div>
+      ) : (
+        <ul className="flex flex-col gap-3">
+          {rows.map((g) => {
+            const payload = g.input_payload as { topic?: string } | null;
+            const topic = typeof payload?.topic === "string" ? payload.topic : "Generation";
+            const brandName =
+              g.brand_id && brandNames[g.brand_id] ? brandNames[g.brand_id] : "Brand";
+            const summary =
+              g.output_summary &&
+              typeof g.output_summary === "object" &&
+              g.output_summary !== null &&
+              "summary" in g.output_summary
+                ? String((g.output_summary as { summary?: string }).summary ?? "")
+              : "";
+            const when = new Date(g.created_at).toLocaleString(undefined, {
+              dateStyle: "medium",
+              timeStyle: "short",
+            });
+            const n = assetCounts[g.id] ?? 0;
+
+            return (
+              <li key={g.id}>
+                <Link
+                  href={`/library/${g.id}`}
+                  className="block rounded-2xl border border-white/10 bg-zinc-900/40 px-5 py-5 transition hover:border-amber-500/25 hover:bg-zinc-900/60 sm:px-6"
+                >
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs text-zinc-500">{when}</p>
+                      <p className="mt-1 text-sm font-medium text-zinc-400">{brandName}</p>
+                      <p className="mt-2 text-base font-semibold leading-snug text-zinc-100">{topic}</p>
+                      {summary ? (
+                        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-zinc-400">{summary}</p>
+                      ) : null}
+                      {g.status === "failed" && g.error_message ? (
+                        <p className="mt-2 text-sm text-red-400/90">{g.error_message}</p>
+                      ) : null}
+                    </div>
+                    <div className="shrink-0 text-right text-sm text-zinc-500">
+                      {g.status === "completed" ? (
+                        <span className="text-emerald-400/90">{n} pieces</span>
+                      ) : g.status === "failed" ? (
+                        <span className="text-red-400/90">Failed</span>
+                      ) : (
+                        <span>{g.status}</span>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }

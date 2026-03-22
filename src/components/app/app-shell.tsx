@@ -1,13 +1,6 @@
 import Link from "next/link";
+import { AppNav } from "@/components/app/app-nav";
 import { SignOutButton } from "@/components/auth/sign-out-button";
-
-const nav = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/brands", label: "Brands" },
-  { href: "/generate", label: "Generate" },
-  { href: "/library", label: "Library" },
-  { href: "/settings", label: "Settings" },
-] as const;
 
 export function AppShell({
   userEmail,
@@ -18,34 +11,27 @@ export function AppShell({
 }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <header className="border-b border-white/10 bg-zinc-950/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-6">
-            <Link href="/dashboard" className="text-sm font-semibold tracking-tight">
-              <span className="text-amber-400">Helion</span>{" "}
-              <span className="text-zinc-100">Content Engine</span>
+      <header className="border-b border-white/10 bg-zinc-950/90 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-4 sm:px-6">
+          <Link href="/dashboard" className="shrink-0 text-base font-semibold tracking-tight text-zinc-100">
+            Helion
+          </Link>
+          <AppNav />
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+            <Link
+              href="/settings"
+              className="rounded-lg px-2 py-1.5 text-sm text-zinc-500 transition hover:bg-white/5 hover:text-zinc-300"
+            >
+              Account
             </Link>
-            <nav className="hidden items-center gap-1 md:flex">
-              {nav.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="rounded-md px-2 py-1 text-sm text-zinc-400 transition hover:bg-white/5 hover:text-zinc-200"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="hidden max-w-[200px] truncate text-xs text-zinc-500 sm:inline">
+            <span className="hidden max-w-[140px] truncate text-xs text-zinc-600 lg:inline">
               {userEmail}
             </span>
             <SignOutButton />
           </div>
         </div>
       </header>
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-8 sm:px-6">
+      <main className="relative z-0 mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-8 pb-40 sm:px-6 md:pb-10 lg:max-w-3xl">
         {children}
       </main>
     </div>

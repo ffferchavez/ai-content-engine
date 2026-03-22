@@ -1,12 +1,21 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { requirePublicSupabaseEnv } from "@/lib/env";
 
+/**
+ * Server Supabase client (session cookies + RLS as the signed-in user).
+ *
+ * Bootstrap: `public.handle_new_user` on `auth.users` creates `profiles`, a default
+ * `organizations` row ("My workspace"), and `organization_members` as `owner`.
+ * Requires the migration applied in Supabase.
+ */
 export async function createClient() {
+  const { url, anonKey } = requirePublicSupabaseEnv();
   const cookieStore = await cookies();
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    anonKey,
     {
       cookies: {
         getAll() {
@@ -18,7 +27,7 @@ export async function createClient() {
               cookieStore.set(name, value, options),
             );
           } catch {
-            // Called from a Server Component without mutable cookies — middleware refreshes session.
+            // Called from a Server Component without mutable cookies — proxy refreshes session.
           }
         },
       },

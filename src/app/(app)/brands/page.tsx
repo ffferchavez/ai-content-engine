@@ -1,15 +1,66 @@
+import { BrandsPanel } from "@/components/brands/brands-panel";
+import type { BrandRow } from "@/lib/brands/types";
+import { getCurrentOrganizationId } from "@/lib/org";
+import { createClient } from "@/lib/supabase/server";
+
 export const metadata = {
-  title: "Brands · AI Content Engine",
+  title: "Your brands",
 };
 
-export default function BrandsPlaceholderPage() {
+export default async function BrandsPage() {
+  const orgId = await getCurrentOrganizationId();
+
+  if (!orgId) {
+    return (
+      <div className="flex flex-col gap-3">
+        <h1 className="text-2xl font-semibold text-zinc-50">Brands</h1>
+        <p className="text-sm leading-relaxed text-amber-200/90" role="status">
+          We couldn&apos;t finish setting up your account. Try signing out and signing in again. If the
+          problem continues, contact support.
+        </p>
+      </div>
+    );
+  }
+
+  const supabase = await createClient();
+  const { data: rows, error } = await supabase
+    .from("brands")
+    .select(
+      "id, organization_id, name, description, voice_notes, target_audience, industry, brand_guidelines, default_language, created_at, updated_at",
+    )
+    .eq("organization_id", orgId)
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    console.error("[brands] list:", error.message);
+    return (
+      <div className="flex flex-col gap-3">
+        <h1 className="text-2xl font-semibold text-zinc-50">Brands</h1>
+        <p className="text-sm text-red-400" role="alert">
+          We couldn&apos;t load your brands. Please refresh the page and try again.
+        </p>
+      </div>
+    );
+  }
+
+  const brands: BrandRow[] = (rows ?? []).map((row) => ({
+    ...row,
+    brand_guidelines:
+      row.brand_guidelines !== null && typeof row.brand_guidelines === "object"
+        ? (row.brand_guidelines as Record<string, unknown>)
+        : null,
+  }));
+
   return (
-    <div className="flex flex-col gap-2">
-      <h1 className="text-2xl font-semibold text-zinc-50">Brands</h1>
-      <p className="text-sm text-zinc-500">
-        Brand profile CRUD arrives in Phase 2 — list, create, and edit
-        voice, audience, and guidelines scoped to your organization.
-      </p>
+    <div className="flex flex-col gap-8">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">Brands</h1>
+        <p className="mt-3 text-base leading-relaxed text-zinc-400">
+          Add one entry for each business or project. When you create posts, you&apos;ll pick which brand
+          to use.
+        </p>
+      </div>
+      <BrandsPanel brands={brands} />
     </div>
   );
 }

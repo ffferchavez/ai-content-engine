@@ -3,31 +3,22 @@ import Link from "next/link";
 import { LoginForm } from "@/components/auth/login-form";
 
 export const metadata = {
-  title: "Sign in · AI Content Engine",
+  title: "Log in",
 };
 
 export default function LoginPage() {
   return (
     <div className="flex min-h-full flex-1 flex-col items-center justify-center px-4 py-16">
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900/50 p-8 shadow-xl shadow-black/40">
-        <div className="mb-6 text-center">
-          <p className="text-xs font-medium uppercase tracking-widest text-amber-400/90">
-            Helion Media
-          </p>
-          <h1 className="mt-2 text-xl font-semibold text-zinc-50">Welcome back</h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Sign in to your workspace.
-          </p>
+      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-zinc-900/50 p-8 sm:p-10">
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-semibold text-zinc-50">Log in</h1>
+          <p className="mt-2 text-sm text-zinc-500">Use the email and password you signed up with.</p>
         </div>
-        <Suspense
-          fallback={
-            <p className="text-center text-sm text-zinc-500">Loading…</p>
-          }
-        >
+        <Suspense fallback={<p className="text-center text-sm text-zinc-500">Loading…</p>}>
           <LoginForm />
         </Suspense>
-        <p className="mt-6 text-center text-xs text-zinc-600">
-          <Link href="/" className="hover:text-zinc-500">
+        <p className="mt-8 text-center text-sm text-zinc-600">
+          <Link href="/" className="text-zinc-500 hover:text-zinc-400">
             ← Back to home
           </Link>
         </p>

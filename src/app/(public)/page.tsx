@@ -5,7 +5,7 @@ export default function HomePage() {
     <main className="flex w-full min-w-0 flex-1 flex-col">
       <section className="w-full max-w-4xl">
         <p className="text-[10px] font-medium uppercase tracking-[0.35em] text-ui-muted-dim">Helion Media</p>
-        <h1 className="mt-5 text-[1.75rem] font-medium leading-[1.08] tracking-[-0.03em] text-ui-text sm:mt-6 sm:text-4xl md:text-5xl lg:text-6xl">
+        <h1 className="mt-5 text-5xl font-medium leading-[1.05] tracking-[-0.035em] text-ui-text sm:mt-6 sm:text-6xl md:text-7xl lg:text-8xl">
           Social posts that sound like you.
         </h1>
         <p className="mt-6 max-w-xl text-base leading-relaxed text-ui-muted sm:mt-8 sm:text-lg">

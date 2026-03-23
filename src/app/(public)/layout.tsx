@@ -92,7 +92,7 @@ export default function PublicLayout({
         <div className={PAGE_INSET}>
           <p className="text-[10px] font-medium uppercase tracking-[0.25em] text-neutral-400">
             Helion City ·{" "}
-            <span className="text-neutral-600">AI content</span>
+            <span className="text-neutral-600">AI Content Engine</span>
           </p>
         </div>
       </footer>

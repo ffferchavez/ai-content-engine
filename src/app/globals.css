@@ -52,7 +52,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Avoid inline env() on the public header — React SSR/client style serialization can mismatch. */
+/* Safe-area top padding for app/public headers — avoid inline env() (hydration mismatch in React). */
 .public-header-safe-top {
   padding-top: env(safe-area-inset-top, 0px);
 }

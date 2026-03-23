@@ -319,7 +319,14 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
           <ul className="mt-6 border-t border-black">
             {assets.map((a, i) =>
               a.asset_type === "post_pack" ? (
-                <PostPackBlock key={a.id} asset={a} index={i} />
+                <PostPackBlock
+                  key={a.id}
+                  asset={a}
+                  index={i}
+                  onAssetMetadataUpdate={(id, metadata) =>
+                    setAssets((prev) => prev.map((x) => (x.id === id ? { ...x, metadata } : x)))
+                  }
+                />
               ) : (
                 <AssetBlock
                   key={a.id}

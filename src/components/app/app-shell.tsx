@@ -5,8 +5,8 @@ import { AppSidebar } from "@/components/app/app-sidebar";
 import { HelionWordmarkLink } from "@/components/brand/helion-wordmark";
 import { MAIN_PAD, PAGE_INSET } from "@/lib/ui/shell";
 
-const APP_HEADER_CLASS = "shrink-0 border-b border-neutral-200/80 bg-white";
-const APP_HEADER_STYLE = { paddingTop: "env(safe-area-inset-top, 0px)" } as const;
+/** Uses `public-header-safe-top` from globals.css — inline env() styles hydrate inconsistently. */
+const APP_HEADER_CLASS = "public-header-safe-top shrink-0 border-b border-neutral-200/80 bg-white";
 
 /** Inline SVG — lucide-react icons often diverge between SSR and client (hydration errors). */
 function MenuIcon() {
@@ -46,7 +46,7 @@ export function AppShell({
 
   return (
     <div className="flex min-h-[100dvh] min-h-screen flex-1 flex-col bg-[#fafafa]">
-      <header className={APP_HEADER_CLASS} style={APP_HEADER_STYLE}>
+      <header className={APP_HEADER_CLASS}>
         <div
           className={`${PAGE_INSET} flex flex-wrap items-center justify-between gap-x-4 gap-y-3 py-3 sm:gap-x-6 sm:py-4`}
         >

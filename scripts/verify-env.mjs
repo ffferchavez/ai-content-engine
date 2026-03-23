@@ -70,3 +70,10 @@ if (!openai) {
     "\nOptional: OPENAI_API_KEY is not set — Create / POST /api/generate will return 503 until you add it.\n",
   );
 }
+
+const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+if (!serviceRole) {
+  console.warn(
+    "\nOptional: SUPABASE_SERVICE_ROLE_KEY is not set — post-pack image upload (POST /api/generated-assets/…/image) will return 503 until you add it.\n",
+  );
+}

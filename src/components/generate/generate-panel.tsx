@@ -300,8 +300,8 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
             <div>
               <h2 className="text-xl font-medium tracking-[-0.02em] text-ui-text">Post packs</h2>
               <p className="mt-1 text-sm text-ui-muted-dim">
-                Each card is a full post: title, angle, format, hook, caption, CTA, hashtags, and visual
-                direction. Image fields are reserved for a future release.
+                Each card includes a platform-style preview plus full fields: angle, hook, caption, CTA,
+                hashtags, and visuals. Generate images from the Images section.
               </p>
               <p className="mt-1 text-xs text-ui-muted-dim">
                 {languageLabel(language)} · {platform.trim() || "any platform"}
@@ -321,6 +321,7 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
               a.asset_type === "post_pack" ? (
                 <PostPackBlock
                   key={a.id}
+                  brandName={brands.find((b) => b.id === brandId)?.name ?? "Brand"}
                   asset={a}
                   index={i}
                   onAssetMetadataUpdate={(id, metadata) =>

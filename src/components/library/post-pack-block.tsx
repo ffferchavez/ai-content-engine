@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { CopyButton } from "@/components/ui/copy-button";
 import { formatPostPackForCopy, parsePostPackFields } from "@/lib/generate/post-pack";
 import { PostPackImageActions } from "@/components/library/post-pack-image-actions";
+import { PostPackSocialPreview } from "@/components/social-preview/post-pack-social-preview";
 
 export type PostPackAssetRow = {
   id: string;
@@ -26,10 +27,13 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 export function PostPackBlock({
   asset,
   index,
+  brandName = "Brand",
   onAssetMetadataUpdate,
 }: {
   asset: PostPackAssetRow;
   index: number;
+  /** Brand label for social-style previews */
+  brandName?: string;
   /** Merge updated metadata in parent lists (Create page). */
   onAssetMetadataUpdate?: (assetId: string, metadata: unknown) => void;
 }) {
@@ -66,6 +70,21 @@ export function PostPackBlock({
       {asset.title ? (
         <h3 className="mt-4 text-lg font-medium tracking-[-0.02em] text-ui-text">{asset.title}</h3>
       ) : null}
+
+      <div className="mt-6">
+        <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-ui-muted-dim">Preview</p>
+        <p className="mt-1 text-xs text-ui-muted-dim">
+          Platform-inspired layout — not an official Instagram or Facebook UI.
+        </p>
+        <div className="mt-4">
+          <PostPackSocialPreview
+            brandName={brandName}
+            platform={asset.platform}
+            parsed={parsed}
+            packTitle={asset.title}
+          />
+        </div>
+      </div>
 
       <Field label="Angle">{parsed.post_angle}</Field>
       <Field label="Hook">

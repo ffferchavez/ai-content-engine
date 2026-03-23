@@ -122,6 +122,7 @@ export default async function LibraryDetailPage({ params }: PageProps) {
               a.asset_type === "post_pack" ? (
                 <PostPackBlock
                   key={a.id}
+                  brandName={brandName}
                   asset={{
                     id: a.id,
                     asset_type: a.asset_type,

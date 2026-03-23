@@ -1,11 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AssetBlock } from "@/components/library/asset-block";
 import { PostPackBlock } from "@/components/library/post-pack-block";
 import { CopyButton } from "@/components/ui/copy-button";
 
-type BrandOption = { id: string; name: string };
+type BrandOption = { id: string; name: string; default_language: string };
 
 type AssetRow = {
   id: string;
@@ -26,16 +26,48 @@ const TONES = [
   { value: "playful", label: "Playful" },
 ] as const;
 
+const LANG_OPTIONS: { value: string; label: string }[] = [
+  { value: "en", label: "English" },
+  { value: "es", label: "Spanish" },
+  { value: "fr", label: "French" },
+  { value: "de", label: "German" },
+  { value: "pt", label: "Portuguese" },
+  { value: "it", label: "Italian" },
+];
+
+const OBJECTIVES = [
+  { value: "", label: "Let Helion infer (default)" },
+  { value: "awareness", label: "Awareness & reach" },
+  { value: "engagement", label: "Engagement (comments, saves)" },
+  { value: "traffic", label: "Traffic to site / link" },
+  { value: "leads", label: "Leads & bookings" },
+  { value: "community", label: "Community & conversation" },
+  { value: "launch", label: "Launch or announcement" },
+] as const;
+
+function languageLabel(code: string): string {
+  return LANG_OPTIONS.find((o) => o.value === code)?.label ?? code;
+}
+
 export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [brandId, setBrandId] = useState(brands[0]?.id ?? "");
   const [topic, setTopic] = useState("");
   const [platform, setPlatform] = useState("");
+  const [language, setLanguage] = useState(brands[0]?.default_language ?? "en");
   const [tone, setTone] = useState("");
+  const [objective, setObjective] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
   const [assets, setAssets] = useState<AssetRow[]>([]);
+
+  useEffect(() => {
+    const b = brands.find((x) => x.id === brandId);
+    if (b?.default_language) {
+      setLanguage(b.default_language);
+    }
+  }, [brandId, brands]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -52,6 +84,8 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
           topic,
           platform: platform.trim() || undefined,
           tone: tone || undefined,
+          language,
+          objective: objective || undefined,
         }),
       });
       const data = (await res.json()) as {
@@ -92,12 +126,16 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
   const fieldClass =
     "w-full rounded-none border border-black bg-ui-bg px-4 py-3 text-[15px] text-ui-text outline-none focus:border-black focus:ring-1 focus:ring-black/10";
 
+  const selectChevron = {
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2371717a'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
+  };
+
   return (
     <div className="flex w-full min-w-0 flex-col gap-8 sm:gap-10">
       <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-6">
         <div>
           <h2 className="text-[10px] font-medium uppercase tracking-[0.25em] text-ui-muted-dim">1. Brand</h2>
-          <p className="mt-1 text-sm text-ui-muted-dim">Who is this post for?</p>
+          <p className="mt-1 text-sm text-ui-muted-dim">Which profile is this for?</p>
           <div className="mt-3 flex flex-col gap-1.5">
             <label htmlFor="gen-brand" className="text-[15px] font-medium text-ui-text">
               Brand
@@ -107,9 +145,7 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
               value={brandId}
               onChange={(e) => setBrandId(e.target.value)}
               className={`${fieldClass} appearance-none bg-[length:1rem] bg-[right_1rem_center] bg-no-repeat pr-10`}
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2371717a'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
-              }}
+              style={selectChevron}
               required
             >
               {brands.map((b) => (
@@ -122,29 +158,52 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
         </div>
 
         <div>
-          <h2 className="text-[10px] font-medium uppercase tracking-[0.25em] text-ui-muted-dim">2. Topic</h2>
+          <h2 className="text-[10px] font-medium uppercase tracking-[0.25em] text-ui-muted-dim">2. Platform</h2>
           <p className="mt-1 text-sm text-ui-muted-dim">
-            You&apos;ll get several complete post packs (hook through visual direction) from this brief.
+            We tailor hooks, length, and hashtag style to how people use each network.
           </p>
           <div className="mt-3 flex flex-col gap-1.5">
-            <label htmlFor="gen-topic" className="text-[15px] font-medium text-ui-text">
-              What do you want to post about?
+            <label htmlFor="gen-platform" className="text-[15px] font-medium text-ui-text">
+              Primary platform
             </label>
-            <textarea
-              id="gen-topic"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              className={`${fieldClass} min-h-[120px] resize-y leading-relaxed`}
-              placeholder="e.g. Announce our spring menu, highlight our team, promote a weekend sale…"
-              required
-              maxLength={8000}
+            <input
+              id="gen-platform"
+              value={platform}
+              onChange={(e) => setPlatform(e.target.value)}
+              className={fieldClass}
+              placeholder="Instagram, Facebook, LinkedIn, TikTok…"
+              maxLength={120}
             />
           </div>
         </div>
 
         <div>
-          <h2 className="text-[10px] font-medium uppercase tracking-[0.25em] text-ui-muted-dim">3. Style (optional)</h2>
-          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          <h2 className="text-[10px] font-medium uppercase tracking-[0.25em] text-ui-muted-dim">
+            3. Language, tone & goal
+          </h2>
+          <div className="mt-3 grid gap-4 sm:grid-cols-3">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="gen-language" className="text-[15px] font-medium text-ui-text">
+                Language
+              </label>
+              <select
+                id="gen-language"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className={`${fieldClass} appearance-none bg-[length:1rem] bg-[right_1rem_center] bg-no-repeat pr-10`}
+                style={selectChevron}
+              >
+                {!LANG_OPTIONS.some((o) => o.value === language) ? (
+                  <option value={language}>{language} (brand default)</option>
+                ) : null}
+                {LANG_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-ui-muted-dim">Defaults from the brand; you can override here.</p>
+            </div>
             <div className="flex flex-col gap-1.5">
               <label htmlFor="gen-tone" className="text-[15px] font-medium text-ui-text">
                 Tone
@@ -154,9 +213,7 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
                 value={tone}
                 onChange={(e) => setTone(e.target.value)}
                 className={`${fieldClass} appearance-none bg-[length:1rem] bg-[right_1rem_center] bg-no-repeat pr-10`}
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2371717a'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
-                }}
+                style={selectChevron}
               >
                 {TONES.map((t) => (
                   <option key={t.value || "default"} value={t.value}>
@@ -166,18 +223,47 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
               </select>
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="gen-platform" className="text-[15px] font-medium text-ui-text">
-                Platform (optional)
+              <label htmlFor="gen-objective" className="text-[15px] font-medium text-ui-text">
+                Objective
               </label>
-              <input
-                id="gen-platform"
-                value={platform}
-                onChange={(e) => setPlatform(e.target.value)}
-                className={fieldClass}
-                placeholder="Instagram, LinkedIn…"
-                maxLength={120}
-              />
+              <select
+                id="gen-objective"
+                value={objective}
+                onChange={(e) => setObjective(e.target.value)}
+                className={`${fieldClass} appearance-none bg-[length:1rem] bg-[right_1rem_center] bg-no-repeat pr-10`}
+                style={selectChevron}
+              >
+                {OBJECTIVES.map((o) => (
+                  <option key={o.value || "default"} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
             </div>
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-[10px] font-medium uppercase tracking-[0.25em] text-ui-muted-dim">
+            4. Brief & context
+          </h2>
+          <p className="mt-1 text-sm text-ui-muted-dim">
+            What to post about, plus any campaign notes, offers, or constraints. You’ll get 3–5 complete
+            post packs from this brief.
+          </p>
+          <div className="mt-3 flex flex-col gap-1.5">
+            <label htmlFor="gen-topic" className="text-[15px] font-medium text-ui-text">
+              Topic & optional context
+            </label>
+            <textarea
+              id="gen-topic"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              className={`${fieldClass} min-h-[120px] resize-y leading-relaxed`}
+              placeholder="e.g. Spring menu launch — highlight two new dishes, mention weekend hours, keep it welcoming…"
+              required
+              maxLength={8000}
+            />
           </div>
         </div>
 
@@ -192,7 +278,7 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
           disabled={pending}
           className="w-full rounded-none bg-black py-3.5 text-[15px] font-medium text-white transition hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[220px] sm:px-10"
         >
-          {pending ? "Creating…" : "Generate pack"}
+          {pending ? "Generating…" : "Generate posts"}
         </button>
       </form>
 
@@ -214,7 +300,12 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
             <div>
               <h2 className="text-xl font-medium tracking-[-0.02em] text-ui-text">Post packs</h2>
               <p className="mt-1 text-sm text-ui-muted-dim">
-                Each card is a full post: angle, format, hook, caption, CTA, hashtags, and visual direction.
+                Each card is a full post: title, angle, format, hook, caption, CTA, hashtags, and visual
+                direction. Image fields are reserved for a future release.
+              </p>
+              <p className="mt-1 text-xs text-ui-muted-dim">
+                {languageLabel(language)} · {platform.trim() || "any platform"}
+                {objective ? ` · ${OBJECTIVES.find((o) => o.value === objective)?.label ?? objective}` : ""}
               </p>
             </div>
             <button
@@ -222,7 +313,7 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
               onClick={regenerateAnother}
               className="rounded-none border border-black px-4 py-2 text-sm font-medium text-ui-text transition hover:bg-neutral-50"
             >
-              New pack (same form)
+              New generation (same form)
             </button>
           </div>
           <ul className="mt-6 border-t border-black">
@@ -244,7 +335,7 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
             )}
           </ul>
           <p className="text-sm text-ui-muted-dim">
-            Saved automatically — view anytime under <span className="text-ui-muted">Saved</span>.
+            Saved automatically — open anytime under <span className="text-ui-muted">Saved</span>.
           </p>
         </section>
       ) : null}

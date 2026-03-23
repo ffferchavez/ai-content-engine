@@ -57,10 +57,21 @@ export default async function LibraryDetailPage({ params }: PageProps) {
     .order("sort_order", { ascending: true });
 
   const assets = assetRows ?? [];
-  const payload = gen.input_payload as { topic?: string; tone?: string; platform?: string } | null;
+  const payload = gen.input_payload as {
+    topic?: string;
+    tone?: string;
+    platform?: string;
+    language?: string;
+    objective?: string | null;
+  } | null;
   const topic = typeof payload?.topic === "string" ? payload.topic : "Generation";
   const tone = typeof payload?.tone === "string" ? payload.tone : null;
   const platform = typeof payload?.platform === "string" ? payload.platform : null;
+  const language = typeof payload?.language === "string" ? payload.language : null;
+  const objective =
+    typeof payload?.objective === "string" && payload.objective.trim()
+      ? payload.objective.trim()
+      : null;
   const summary =
     gen.output_summary &&
     typeof gen.output_summary === "object" &&
@@ -89,8 +100,10 @@ export default async function LibraryDetailPage({ params }: PageProps) {
         </h1>
         <p className="mt-3 text-sm text-ui-muted sm:mt-4">
           {brandName}
+          {language ? ` · ${language}` : ""}
           {tone ? ` · ${tone}` : ""}
           {platform ? ` · ${platform}` : ""}
+          {objective ? ` · ${objective}` : ""}
         </p>
         {gen.status === "failed" && gen.error_message ? (
           <p className="mt-6 text-sm text-red-700">{gen.error_message}</p>

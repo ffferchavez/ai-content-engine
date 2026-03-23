@@ -22,6 +22,12 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
+function mediaStatusLabel(status: string): string {
+  if (status === "pending") return "Pending";
+  if (status === "ready") return "Ready";
+  return "Not generated";
+}
+
 export function PostPackBlock({ asset, index }: { asset: PostPackAssetRow; index: number }) {
   const parsed = parsePostPackFields(asset.metadata);
   if (!parsed) {
@@ -43,7 +49,7 @@ export function PostPackBlock({ asset, index }: { asset: PostPackAssetRow; index
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2 text-xs text-ui-muted-dim">
           <span className="border border-black px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-ui-muted">
-            Post {index + 1}
+            Post pack {index + 1}
           </span>
           <span className="border border-black/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider">
             {parsed.suggested_format}
@@ -71,6 +77,33 @@ export function PostPackBlock({ asset, index }: { asset: PostPackAssetRow; index
       <Field label="Visual direction">
         <p className="whitespace-pre-wrap">{parsed.visual_direction}</p>
       </Field>
+
+      <div className="mt-8 border border-dashed border-black/30 bg-ui-bg/50 p-4">
+        <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-ui-muted-dim">Media (extension)</p>
+        <p className="mt-2 text-xs text-ui-muted-dim">
+          Automated images and video export are not in v1. Status and URLs are reserved for a future
+          pipeline; reel suggestions above are copy and direction only.
+        </p>
+        {parsed.image_prompt ? (
+          <Field label="Image prompt (future generator)">
+            <p className="whitespace-pre-wrap text-ui-text">{parsed.image_prompt}</p>
+          </Field>
+        ) : null}
+        <div className="mt-4 flex flex-wrap gap-x-8 gap-y-3 text-xs text-ui-muted-dim">
+          <span>
+            <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-ui-muted-dim">
+              Status
+            </span>
+            <span className="ml-2 text-ui-muted">{mediaStatusLabel(parsed.media_status)}</span>
+          </span>
+          <span className="font-mono">
+            image_url: {parsed.image_url ?? "—"}
+          </span>
+          <span className="font-mono">
+            media_url: {parsed.media_url ?? "—"}
+          </span>
+        </div>
+      </div>
     </li>
   );
 }

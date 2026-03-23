@@ -52,6 +52,11 @@ body {
   overflow-x: hidden;
 }
 
+/* Avoid inline env() on the public header — React SSR/client style serialization can mismatch. */
+.public-header-safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
 ::selection {
   background: var(--ui-yellow-muted);
   color: var(--ui-ink-deep);

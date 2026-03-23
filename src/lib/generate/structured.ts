@@ -15,39 +15,69 @@ export type StructuredPackResult = {
   post_packs: SocialPostPack[];
 };
 
-const SYSTEM = `You are the social content studio for Helion Media. Output a single JSON object only — no markdown, no prose outside JSON.
+const SYSTEM = `You are the Helion Media social studio. Helion helps real businesses ship social content that sounds human and on-brand — never generic "AI marketing" filler.
 
-Your job is to deliver READY-TO-POST social packs: concrete, specific, and native to how people actually use each format on Instagram / LinkedIn / TikTok (short lines, real hooks, no brochure tone).
+Output ONE JSON object only. No markdown fences, no commentary outside JSON.
 
-JSON schema (exact keys):
+## Output shape (exact keys)
 {
-  "summary": "one sharp sentence: what this batch is for and how the posts differ",
+  "summary": "One sentence: what this batch is for and how the 3–5 posts differ.",
   "post_packs": [
     {
-      "title": "short internal name for this post (not clickbait)",
-      "post_angle": "the one idea or POV this post pushes",
+      "title": "Short internal label for this post (not clickbait)",
+      "post_angle": "The single idea or POV this post commits to",
       "suggested_format": "carousel" | "reel" | "static post" | "story",
-      "hook": "opening line or on-screen text — punchy, speakable, platform-realistic",
-      "caption": "full caption with natural line breaks where needed",
-      "call_to_action": "specific next step (comment, save, DM, book, etc.)",
-      "hashtags": "space-separated or inline — realistic count, not spam",
-      "visual_direction": "what to show or film: shots, layout, text-on-screen, b-roll — practical for a creator"
+      "hook": "First line or on-screen opener — tight, speakable, fits the platform",
+      "caption": "Full caption with natural line breaks; length should match the platform norms in the user message",
+      "call_to_action": "One concrete next step (comment, save, DM, link in bio, book, etc.)",
+      "hashtags": "Realistic set for the platform — not spammy; use # where appropriate or plain words if the platform rarely uses hashtags",
+      "visual_direction": "Practical art direction: composition, subject, lighting mood, text overlay placement — what a designer or photographer could execute",
+      "image_prompt": "Optional: ONE short English line a future image model could use (subject + style). Use null if not needed."
     }
   ]
 }
 
-Rules:
-- Produce exactly 3, 4, or 5 items in post_packs (never fewer than 3, never more than 5).
-- Each post must be a COMPLETE pack: every field non-empty.
-- Make posts DISTINCT: different angles, formats, and hooks — not five versions of the same line.
-- Match the brand voice from the user message; mirror real vocabulary from the brand context when possible.
-- Avoid generic agency filler: no "digital transformation", "unlock potential", "elevate your brand", "in today's fast-paced world", "synergy", "leverage", "cutting-edge" unless the brand itself uses that language.
-- Avoid stock phrases like "Join us on a journey" unless it fits the brand voice.
-- Write like a practitioner shipping content this week: specific details, real scenarios, clear visuals.
+## Helion quality bar
+- Write like someone who posts for this brand weekly: concrete nouns, real scenarios, specific details from the brand context.
+- Each pack is ONE complete post, not a bucket of parts. Hook + caption + CTA + hashtags + visuals must feel like the same post.
+- Make the 3–5 packs clearly different (angle, format, hook) — not small rewrites of the same idea.
+
+## Platform awareness (when the user names a platform, follow it strictly)
+- Instagram: punchy hook, short paragraphs or single block, strong visual_direction; carousels = slide-by-slide beats in visual_direction if format is carousel.
+- Facebook: slightly warmer, community-oriented language; hooks can be a full first sentence.
+- LinkedIn: professional but not stiff; line breaks for skim-reading; avoid hashtag walls; hooks often work as a standalone first line.
+- TikTok-style / short-form: ultra-tight hook; caption can reference on-screen text; still no video file — text only.
+
+## Format field (suggested_format)
+- "static post" and "carousel" are preferred for LinkedIn and many B2B cases.
+- "story" for ephemeral, vertical, time-bound angles.
+- "reel": ONLY as a *concept* — shot list + on-screen text ideas in hook/visual_direction. This app does NOT produce video files; never imply exported video or editing timelines.
+
+## Language
+- Write every user-facing string in the language specified in the user message (hook, caption, CTA, hashtags as appropriate for that locale). If the language is English, use the brand's market (US/UK) vocabulary from context.
+
+## Objective
+- Align CTA and tone with the campaign objective in the user message (e.g. awareness vs leads).
+
+## Banned patterns (unless the brand voice explicitly uses them)
+- "In today's fast-paced world", "unlock", "elevate your brand", "game-changer", "synergy", "leverage", "cutting-edge", "digital transformation", "join us on a journey".
+- Empty superlatives ("best ever") without proof or brand voice.
+- Generic questions as hooks ("Did you know…?") unless they are specific.
+
+## Rules
+- Exactly 3, 4, or 5 items in post_packs — never fewer, never more.
+- Every required string field must be non-empty. Use null only for image_prompt when omitting it.
 - suggested_format must be one of: carousel, reel, static post, story.`;
 
 function isNonEmptyString(v: unknown): v is string {
   return typeof v === "string" && v.trim().length > 0;
+}
+
+function parseOptionalImagePrompt(raw: unknown): string | null {
+  if (raw === null || raw === undefined) return null;
+  if (typeof raw !== "string") return null;
+  const t = raw.trim();
+  return t.length > 0 ? t : null;
 }
 
 function parsePostPackItem(raw: unknown): SocialPostPack | null {
@@ -67,6 +97,7 @@ function parsePostPackItem(raw: unknown): SocialPostPack | null {
   const suggested_format: SuggestedFormat = (fmtRaw
     ? normalizeSuggestedFormat(fmtRaw)
     : "static post") as SuggestedFormat;
+  const image_prompt = parseOptionalImagePrompt(o.image_prompt);
   return {
     title,
     post_angle,
@@ -76,6 +107,10 @@ function parsePostPackItem(raw: unknown): SocialPostPack | null {
     call_to_action,
     hashtags,
     visual_direction,
+    image_prompt,
+    image_url: null,
+    media_url: null,
+    media_status: "not_generated",
   };
 }
 
@@ -89,36 +124,56 @@ function parsePostPacks(raw: unknown): SocialPostPack[] {
   return out;
 }
 
+const OBJECTIVE_LABELS: Record<string, string> = {
+  awareness: "brand awareness / reach",
+  engagement: "comments, saves, shares",
+  traffic: "clicks to site or link",
+  leads: "DMs, sign-ups, bookings",
+  community: "belonging and conversation",
+  launch: "announcement or campaign push",
+};
+
 export async function runStructuredGeneration(params: {
   brandName: string;
   brandBlock: string;
   topic: string;
   platform?: string;
-  /** e.g. friendly, professional, bold */
   tone?: string;
+  /** ISO-ish code e.g. en, es */
+  language?: string;
+  /** e.g. awareness, leads */
+  objective?: string;
 }): Promise<StructuredPackResult> {
   const apiKey = getOptionalOpenAIApiKey();
   if (!apiKey) {
     throw new Error("OPENAI_API_KEY is not set");
   }
 
+  const lang = params.language?.trim() || "en";
+  const objectiveKey = params.objective?.trim() ?? "";
+  const objectiveLine = objectiveKey
+    ? `Campaign objective: ${OBJECTIVE_LABELS[objectiveKey] ?? objectiveKey}. Shape CTA and proof points to match.`
+    : "";
+
   const openai = new OpenAI({ apiKey });
   const userMsg = [
     `Brand name: ${params.brandName}`,
+    `Write all post copy in language code: ${lang} (use natural native phrasing for that language).`,
     params.brandBlock ? `Brand context:\n${params.brandBlock}` : "",
-    params.tone ? `Tone: write in a ${params.tone} style.` : "",
-    `Topic / brief: ${params.topic}`,
+    objectiveLine,
+    params.tone ? `Tone overlay: ${params.tone} — still must match brand context above.` : "",
+    `Topic / campaign notes:\n${params.topic}`,
     params.platform
-      ? `Primary platform or channel: ${params.platform} — tailor hooks and caption shape to what works there.`
-      : "",
-    "Return 3–5 complete post_packs as specified.",
+      ? `Primary platform: ${params.platform} — hooks, caption length, line breaks, and hashtag style must match what performs there.`
+      : "If no platform was given, choose sensible defaults per post (vary formats) and note the assumed platform in each post_angle only if helpful.",
+    "Return 3–5 complete post_packs as specified. image_prompt may be null on any item.",
   ]
     .filter(Boolean)
     .join("\n\n");
 
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
-    temperature: 0.75,
+    temperature: 0.72,
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: SYSTEM },

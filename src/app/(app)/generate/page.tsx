@@ -23,7 +23,7 @@ export default async function GeneratePage() {
   const supabase = await createClient();
   const { data: brandRows, error } = await supabase
     .from("brands")
-    .select("id, name")
+    .select("id, name, default_language")
     .eq("organization_id", orgId)
     .order("name", { ascending: true });
 
@@ -49,8 +49,8 @@ export default async function GeneratePage() {
           New content pack
         </h1>
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ui-muted sm:mt-6 sm:text-base">
-          Pick a brand, describe the topic, and get 3–5 ready-to-post packs: angle, format, hook,
-          caption, CTA, hashtags, and visual direction. Results are saved automatically.
+          Choose a brand, platform, language, tone, and goal — then get 3–5 complete post packs (angle,
+          format, hook, caption, CTA, hashtags, visual direction). Saved automatically to your library.
         </p>
       </header>
       <GeneratePanel brands={brands} />

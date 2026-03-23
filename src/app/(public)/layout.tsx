@@ -2,8 +2,8 @@ import Link from "next/link";
 import { HelionWordmarkLink } from "@/components/brand/helion-wordmark";
 import { PAGE_INSET } from "@/lib/ui/shell";
 
-const PUBLIC_HEADER_CLASS = "w-full border-b border-neutral-200/80 bg-white";
-const PUBLIC_HEADER_STYLE = { paddingTop: "env(safe-area-inset-top, 0px)" } as const;
+const PUBLIC_HEADER_CLASS =
+  "public-header-safe-top w-full border-b border-neutral-200/80 bg-white";
 
 /** Inline SVGs avoid lucide-react SSR/client attribute drift (common hydration mismatch source). */
 function LogInIcon() {
@@ -60,7 +60,7 @@ export default function PublicLayout({
       className="flex min-h-[100dvh] min-h-screen flex-1 flex-col bg-[#fafafa]"
       suppressHydrationWarning
     >
-      <header className={PUBLIC_HEADER_CLASS} style={PUBLIC_HEADER_STYLE}>
+      <header className={PUBLIC_HEADER_CLASS}>
         <div
           className={`${PAGE_INSET} flex flex-wrap items-center justify-between gap-3 py-3 sm:gap-4 sm:py-4`}
         >

@@ -9,6 +9,17 @@ export const SUGGESTED_FORMATS = [
 
 export type SuggestedFormat = (typeof SUGGESTED_FORMATS)[number];
 
+/** Reserved for when image/media pipelines exist; v1 always stores placeholders. */
+export type GenerationMediaStatus = "not_generated" | "pending" | "ready";
+
+export type PostPackMediaExtension = {
+  /** Optional one-line prompt for a future image model; may be null in v1. */
+  image_prompt: string | null;
+  image_url: string | null;
+  media_url: string | null;
+  media_status: GenerationMediaStatus;
+};
+
 export type PostPackFields = {
   post_angle: string;
   suggested_format: SuggestedFormat;
@@ -17,10 +28,22 @@ export type PostPackFields = {
   call_to_action: string;
   hashtags: string;
   visual_direction: string;
-};
+} & PostPackMediaExtension;
 
 function isNonEmptyString(v: unknown): v is string {
   return typeof v === "string" && v.trim().length > 0;
+}
+
+function parseOptionalString(v: unknown): string | null {
+  if (v === null || v === undefined) return null;
+  if (typeof v !== "string") return null;
+  const t = v.trim();
+  return t.length > 0 ? t : null;
+}
+
+function normalizeMediaStatus(raw: unknown): GenerationMediaStatus {
+  if (raw === "pending" || raw === "ready") return raw;
+  return "not_generated";
 }
 
 export function normalizeSuggestedFormat(raw: string): SuggestedFormat {
@@ -46,6 +69,10 @@ export function parsePostPackFields(raw: unknown): PostPackFields | null {
   }
   const fmtRaw = isNonEmptyString(o.suggested_format) ? o.suggested_format : "static post";
   const suggested_format = normalizeSuggestedFormat(fmtRaw);
+  const image_prompt = parseOptionalString(o.image_prompt);
+  const image_url = parseOptionalString(o.image_url);
+  const media_url = parseOptionalString(o.media_url);
+  const media_status = normalizeMediaStatus(o.media_status);
   return {
     post_angle,
     suggested_format,
@@ -54,6 +81,10 @@ export function parsePostPackFields(raw: unknown): PostPackFields | null {
     call_to_action,
     hashtags,
     visual_direction,
+    image_prompt,
+    image_url,
+    media_url,
+    media_status,
   };
 }
 
@@ -83,6 +114,9 @@ export function formatPostPackForCopy(params: {
     "",
     "Visual direction:",
     fields.visual_direction,
-  ].filter((line) => line !== "");
+    fields.image_prompt ? ["", "Image prompt (future):", fields.image_prompt] : [],
+  ]
+    .flat()
+    .filter((line) => line !== "");
   return lines.join("\n").trim();
 }

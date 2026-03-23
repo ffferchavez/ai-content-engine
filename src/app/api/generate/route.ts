@@ -53,6 +53,8 @@ export async function POST(request: Request) {
     topic?: string;
     platform?: string;
     tone?: string;
+    language?: string;
+    objective?: string;
   };
   try {
     body = (await request.json()) as typeof body;
@@ -67,6 +69,21 @@ export async function POST(request: Request) {
   const toneRaw = typeof body.tone === "string" ? body.tone.trim().toLowerCase() : "";
   const allowedTones = new Set(["friendly", "professional", "bold", "calm", "playful"]);
   const tone = allowedTones.has(toneRaw) ? toneRaw : undefined;
+
+  const langRaw = typeof body.language === "string" ? body.language.trim().toLowerCase() : "";
+  const allowedLangs = new Set(["en", "es", "fr", "de", "pt", "it"]);
+  const languageOverride = allowedLangs.has(langRaw) ? langRaw : undefined;
+
+  const objRaw = typeof body.objective === "string" ? body.objective.trim().toLowerCase() : "";
+  const allowedObjectives = new Set([
+    "awareness",
+    "engagement",
+    "traffic",
+    "leads",
+    "community",
+    "launch",
+  ]);
+  const objective = allowedObjectives.has(objRaw) ? objRaw : undefined;
 
   if (!brandId || !UUID_RE.test(brandId)) {
     return NextResponse.json({ error: "Choose a valid brand" }, { status: 400 });
@@ -113,6 +130,8 @@ export async function POST(request: Request) {
         platform: platform ?? null,
         brand_name: brand.name,
         tone: tone ?? null,
+        language: languageOverride ?? brand.default_language ?? "en",
+        objective: objective ?? null,
       },
       provider: "openai",
     })
@@ -133,13 +152,15 @@ export async function POST(request: Request) {
       topic,
       platform,
       tone,
+      language: languageOverride ?? brand.default_language ?? "en",
+      objective,
     });
 
     const assetRows = pack.post_packs.map((p, i) => ({
       content_generation_id: generationId,
       asset_type: "post_pack",
       platform: platform ?? null,
-      language: brand.default_language ?? "en",
+      language: languageOverride ?? brand.default_language ?? "en",
       sort_order: i,
       title: p.title,
       body: p.caption,
@@ -151,6 +172,10 @@ export async function POST(request: Request) {
         call_to_action: p.call_to_action,
         hashtags: p.hashtags,
         visual_direction: p.visual_direction,
+        image_prompt: p.image_prompt,
+        image_url: p.image_url,
+        media_url: p.media_url,
+        media_status: p.media_status,
       },
     }));
 

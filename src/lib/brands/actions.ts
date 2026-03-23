@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { brandUrlsFromFormData } from "@/lib/brands/urls";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentOrganizationId } from "@/lib/org";
 
@@ -37,6 +38,11 @@ export async function createBrand(formData: FormData): Promise<BrandActionResult
   const brand_notes = String(formData.get("brand_notes") ?? "");
   const brand_guidelines = guidelinesFromNotes(brand_notes);
 
+  const urlsResult = brandUrlsFromFormData(formData);
+  if (!urlsResult.ok) {
+    return { ok: false, error: urlsResult.error };
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.from("brands").insert({
     organization_id: orgId,
@@ -46,6 +52,7 @@ export async function createBrand(formData: FormData): Promise<BrandActionResult
     target_audience,
     industry,
     brand_guidelines,
+    brand_urls: urlsResult.brand_urls,
     default_language,
   });
 
@@ -83,6 +90,11 @@ export async function updateBrand(formData: FormData): Promise<BrandActionResult
   const brand_notes = String(formData.get("brand_notes") ?? "");
   const brand_guidelines = guidelinesFromNotes(brand_notes);
 
+  const urlsResult = brandUrlsFromFormData(formData);
+  if (!urlsResult.ok) {
+    return { ok: false, error: urlsResult.error };
+  }
+
   const supabase = await createClient();
   const { error } = await supabase
     .from("brands")
@@ -93,6 +105,7 @@ export async function updateBrand(formData: FormData): Promise<BrandActionResult
       target_audience,
       industry,
       brand_guidelines,
+      brand_urls: urlsResult.brand_urls,
       default_language,
     })
     .eq("id", id)

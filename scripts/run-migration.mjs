@@ -1,10 +1,21 @@
 /**
- * Applies supabase/migrations/20250322000000_initial_schema.sql using DATABASE_URL.
+ * Applies a SQL migration file using DATABASE_URL.
+ *
+ * Usage:
+ *   node scripts/run-migration.mjs [path/to/migration.sql]
+ *
+ * Default (no args): supabase/migrations/20250322000000_initial_schema.sql
+ *
+ * Examples:
+ *   npm run db:migrate
+ *   npm run db:migrate:brand-urls
+ *   node scripts/run-migration.mjs supabase/migrations/20250325000000_brand_urls.sql
+ *
  * Get the connection string from Supabase Dashboard → Settings → Database → Connection string (URI).
  */
 import dotenv from "dotenv";
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
 
@@ -24,17 +35,23 @@ if (!rawUrl) {
     "Missing DATABASE_URL.\n\n" +
       "Add it to .env.local (or pass DATABASE_URL=...).\n" +
       "Supabase Dashboard → Settings → Database → Connection string → URI (include password).\n\n" +
-      "Alternatively, paste the contents of supabase/migrations/20250322000000_initial_schema.sql into SQL Editor and run.",
+      "Alternatively, paste the migration SQL into the Supabase SQL Editor and run it there.",
   );
   process.exit(1);
 }
 
-const migrationPath = join(
-  root,
-  "supabase",
-  "migrations",
-  "20250322000000_initial_schema.sql",
-);
+const defaultMigration = join(root, "supabase", "migrations", "20250322000000_initial_schema.sql");
+const argPath = process.argv[2]?.trim();
+const migrationPath = argPath
+  ? isAbsolute(argPath)
+    ? argPath
+    : resolve(root, argPath)
+  : defaultMigration;
+
+if (!existsSync(migrationPath)) {
+  console.error("Migration file not found:", migrationPath);
+  process.exit(1);
+}
 
 const sql = readFileSync(migrationPath, "utf8");
 

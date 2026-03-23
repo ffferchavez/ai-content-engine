@@ -1,8 +1,10 @@
 import { APIError } from "openai";
 import { NextResponse } from "next/server";
+import { parseBrandUrlsFromDb, brandUrlsContextBlock } from "@/lib/brands/urls";
 import { runStructuredGeneration } from "@/lib/generate/structured";
 import { allowGenerate } from "@/lib/generate/rate-limit";
 import { getCurrentOrganizationId } from "@/lib/org";
+import { generationPlatformLabel, parseGenerationPlatformId } from "@/lib/platforms";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -22,6 +24,8 @@ function mapOpenAIError(err: unknown): string {
     if (err.message.includes("OPENAI_API_KEY")) {
       return "OPENAI_API_KEY is not set";
     }
+    // Parsing / validation errors from `runStructuredGeneration` (safe to show)
+    if (err.message.trim()) return err.message.trim();
   }
   return "Generation failed. Try again.";
 }
@@ -64,8 +68,7 @@ export async function POST(request: Request) {
 
   const brandId = typeof body.brandId === "string" ? body.brandId.trim() : "";
   const topic = typeof body.topic === "string" ? body.topic.trim() : "";
-  const platform =
-    typeof body.platform === "string" && body.platform.trim() ? body.platform.trim().slice(0, 120) : undefined;
+  const platformSlug = parseGenerationPlatformId(body.platform);
   const toneRaw = typeof body.tone === "string" ? body.tone.trim().toLowerCase() : "";
   const allowedTones = new Set(["friendly", "professional", "bold", "calm", "playful"]);
   const tone = allowedTones.has(toneRaw) ? toneRaw : undefined;
@@ -88,6 +91,10 @@ export async function POST(request: Request) {
   if (!brandId || !UUID_RE.test(brandId)) {
     return NextResponse.json({ error: "Choose a valid brand" }, { status: 400 });
   }
+  if (!platformSlug) {
+    return NextResponse.json({ error: "Choose a primary platform" }, { status: 400 });
+  }
+
   if (!topic) {
     return NextResponse.json({ error: "Add a topic or brief" }, { status: 400 });
   }
@@ -98,9 +105,11 @@ export async function POST(request: Request) {
     );
   }
 
+  const platformLabel = generationPlatformLabel(platformSlug);
+
   const { data: brand, error: brandError } = await supabase
     .from("brands")
-    .select("id, name, description, voice_notes, target_audience, industry, default_language")
+    .select("id, name, description, voice_notes, target_audience, industry, default_language, brand_urls")
     .eq("id", brandId)
     .eq("organization_id", orgId)
     .maybeSingle();
@@ -109,11 +118,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Brand not found" }, { status: 404 });
   }
 
+  const brandUrls = parseBrandUrlsFromDb(
+    (brand as { brand_urls?: unknown }).brand_urls,
+  );
+  const urlsBlock = brandUrlsContextBlock(brandUrls);
+
   const brandBlock = [
     brand.description ? `About: ${brand.description}` : "",
     brand.industry ? `Industry: ${brand.industry}` : "",
     brand.voice_notes ? `Voice: ${brand.voice_notes}` : "",
     brand.target_audience ? `Audience: ${brand.target_audience}` : "",
+    urlsBlock,
   ]
     .filter(Boolean)
     .join("\n");
@@ -127,7 +142,7 @@ export async function POST(request: Request) {
       status: "draft",
       input_payload: {
         topic,
-        platform: platform ?? null,
+        platform: platformSlug,
         brand_name: brand.name,
         tone: tone ?? null,
         language: languageOverride ?? brand.default_language ?? "en",
@@ -150,7 +165,7 @@ export async function POST(request: Request) {
       brandName: brand.name,
       brandBlock,
       topic,
-      platform,
+      platform: platformLabel,
       tone,
       language: languageOverride ?? brand.default_language ?? "en",
       objective,
@@ -159,7 +174,7 @@ export async function POST(request: Request) {
     const assetRows = pack.post_packs.map((p, i) => ({
       content_generation_id: generationId,
       asset_type: "post_pack",
-      platform: platform ?? null,
+      platform: platformSlug,
       language: languageOverride ?? brand.default_language ?? "en",
       sort_order: i,
       title: p.title,
@@ -221,6 +236,7 @@ export async function POST(request: Request) {
       assets: assetsOut ?? [],
     });
   } catch (err) {
+    console.error("[api/generate] OpenAI / pipeline error:", err);
     const friendly = mapOpenAIError(err);
     const msg = err instanceof Error ? err.message : "Generation failed";
     await supabase

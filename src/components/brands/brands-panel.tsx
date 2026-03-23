@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { BrandRow } from "@/lib/brands/types";
+import type { BrandUrls } from "@/lib/brands/urls";
 import { createBrand, deleteBrand, updateBrand } from "@/lib/brands/actions";
 
 function notesFromGuidelines(brand: BrandRow): string {
@@ -30,6 +31,151 @@ function Field({
       </label>
       {hint ? <p className="text-sm text-ui-muted-dim">{hint}</p> : null}
       {children}
+    </div>
+  );
+}
+
+function BrandUrlsReadOnly({ urls }: { urls: BrandUrls }) {
+  const has =
+    urls.website ||
+    urls.instagram ||
+    urls.facebook ||
+    urls.linkedin ||
+    (urls.custom?.length ?? 0) > 0;
+  if (!has) return null;
+  const linkClass =
+    "font-medium text-ui-text underline decoration-black/25 underline-offset-[3px] transition hover:decoration-black";
+  return (
+    <div className="mt-3 flex flex-col gap-1.5 border-t border-black/10 pt-4">
+      <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-ui-muted-dim">
+        Context sources
+      </p>
+      <p className="text-xs text-ui-muted-dim">Saved for your profile — pages are not fetched automatically yet.</p>
+      <ul className="flex flex-col gap-1.5 text-sm text-ui-muted">
+        {urls.website ? (
+          <li>
+            <a href={urls.website} target="_blank" rel="noopener noreferrer" className={linkClass}>
+              Website
+            </a>
+          </li>
+        ) : null}
+        {urls.instagram ? (
+          <li>
+            <a href={urls.instagram} target="_blank" rel="noopener noreferrer" className={linkClass}>
+              Instagram
+            </a>
+          </li>
+        ) : null}
+        {urls.facebook ? (
+          <li>
+            <a href={urls.facebook} target="_blank" rel="noopener noreferrer" className={linkClass}>
+              Facebook
+            </a>
+          </li>
+        ) : null}
+        {urls.linkedin ? (
+          <li>
+            <a href={urls.linkedin} target="_blank" rel="noopener noreferrer" className={linkClass}>
+              LinkedIn
+            </a>
+          </li>
+        ) : null}
+        {urls.custom?.map((u, i) => (
+          <li key={`${u}-${i}`}>
+            <a href={u} target="_blank" rel="noopener noreferrer" className={linkClass}>
+              Extra link {i + 1}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function BrandUrlsFormFields({
+  idPrefix,
+  defaultWebsite = "",
+  defaultInstagram = "",
+  defaultFacebook = "",
+  defaultLinkedin = "",
+  defaultCustomLines = "",
+}: {
+  idPrefix: string;
+  defaultWebsite?: string;
+  defaultInstagram?: string;
+  defaultFacebook?: string;
+  defaultLinkedin?: string;
+  defaultCustomLines?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-6 border-t border-black/15 pt-6">
+      <div>
+        <h3 className="text-[15px] font-medium text-ui-text">Brand context sources</h3>
+        <p className="mt-1 text-sm leading-relaxed text-ui-muted-dim">
+          Company website and social profile URLs. Saved as brand context sources — we don&apos;t fetch these pages
+          yet; they&apos;re for your reference and future use in generation.
+        </p>
+      </div>
+      <Field label="Company website" htmlFor={`${idPrefix}-url-website`}>
+        <input
+          id={`${idPrefix}-url-website`}
+          name="url_website"
+          type="text"
+          inputMode="url"
+          autoComplete="url"
+          defaultValue={defaultWebsite}
+          className={fieldClass}
+          placeholder="https://example.com"
+        />
+      </Field>
+      <div className="grid gap-6 sm:grid-cols-2">
+        <Field label="Instagram" htmlFor={`${idPrefix}-url-instagram`}>
+          <input
+            id={`${idPrefix}-url-instagram`}
+            name="url_instagram"
+            type="text"
+            inputMode="url"
+            defaultValue={defaultInstagram}
+            className={fieldClass}
+            placeholder="https://instagram.com/…"
+          />
+        </Field>
+        <Field label="Facebook" htmlFor={`${idPrefix}-url-facebook`}>
+          <input
+            id={`${idPrefix}-url-facebook`}
+            name="url_facebook"
+            type="text"
+            inputMode="url"
+            defaultValue={defaultFacebook}
+            className={fieldClass}
+            placeholder="https://facebook.com/…"
+          />
+        </Field>
+      </div>
+      <Field label="LinkedIn" htmlFor={`${idPrefix}-url-linkedin`}>
+        <input
+          id={`${idPrefix}-url-linkedin`}
+          name="url_linkedin"
+          type="text"
+          inputMode="url"
+          defaultValue={defaultLinkedin}
+          className={fieldClass}
+          placeholder="https://linkedin.com/company/…"
+        />
+      </Field>
+      <Field
+        label="Extra URLs (optional)"
+        hint="Up to 5 links, one per line — other profiles, Linktree, press, etc."
+        htmlFor={`${idPrefix}-url-custom`}
+      >
+        <textarea
+          id={`${idPrefix}-url-custom`}
+          name="url_custom_lines"
+          defaultValue={defaultCustomLines}
+          className={textareaClass}
+          placeholder={"https://linktr.ee/yourbrand\nhttps://…"}
+        />
+      </Field>
     </div>
   );
 }
@@ -189,6 +335,8 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
                 />
               </Field>
 
+              <BrandUrlsFormFields idPrefix="create" />
+
               <Field
                 label="Anything else we should know? (optional)"
                 hint="Rules, topics to avoid, seasonal promos — plain words are fine."
@@ -342,6 +490,15 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
                           />
                         </Field>
 
+                        <BrandUrlsFormFields
+                          idPrefix={`edit-${brand.id}`}
+                          defaultWebsite={brand.brand_urls?.website ?? ""}
+                          defaultInstagram={brand.brand_urls?.instagram ?? ""}
+                          defaultFacebook={brand.brand_urls?.facebook ?? ""}
+                          defaultLinkedin={brand.brand_urls?.linkedin ?? ""}
+                          defaultCustomLines={brand.brand_urls?.custom?.join("\n") ?? ""}
+                        />
+
                         <Field
                           label="Anything else we should know? (optional)"
                           htmlFor={`edit-notes-${brand.id}`}
@@ -393,6 +550,7 @@ export function BrandsPanel({ brands }: { brands: BrandRow[] }) {
                           ) : (
                             <p className="mt-2 text-sm text-ui-muted-dim">No description yet</p>
                           )}
+                          <BrandUrlsReadOnly urls={brand.brand_urls} />
                         </div>
                         <div className="flex shrink-0 gap-2 sm:flex-col sm:items-end">
                           <button

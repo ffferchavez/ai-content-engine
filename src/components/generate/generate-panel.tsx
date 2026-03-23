@@ -4,6 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { AssetBlock } from "@/components/library/asset-block";
 import { PostPackBlock } from "@/components/library/post-pack-block";
 import { CopyButton } from "@/components/ui/copy-button";
+import {
+  GENERATION_PLATFORMS,
+  type GenerationPlatformId,
+  generationPlatformLabel,
+} from "@/lib/platforms";
 
 type BrandOption = { id: string; name: string; default_language: string };
 
@@ -53,7 +58,7 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [brandId, setBrandId] = useState(brands[0]?.id ?? "");
   const [topic, setTopic] = useState("");
-  const [platform, setPlatform] = useState("");
+  const [platformId, setPlatformId] = useState<GenerationPlatformId>("instagram");
   const [language, setLanguage] = useState(brands[0]?.default_language ?? "en");
   const [tone, setTone] = useState("");
   const [objective, setObjective] = useState("");
@@ -82,7 +87,7 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
         body: JSON.stringify({
           brandId,
           topic,
-          platform: platform.trim() || undefined,
+          platform: platformId,
           tone: tone || undefined,
           language,
           objective: objective || undefined,
@@ -160,20 +165,39 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
         <div>
           <h2 className="text-[10px] font-medium uppercase tracking-[0.25em] text-ui-muted-dim">2. Platform</h2>
           <p className="mt-1 text-sm text-ui-muted-dim">
-            We tailor hooks, length, and hashtag style to how people use each network.
+            We tailor hooks, length, and hashtag style to how people use each network. Pick one main platform for
+            this generation.
           </p>
-          <div className="mt-3 flex flex-col gap-1.5">
-            <label htmlFor="gen-platform" className="text-[15px] font-medium text-ui-text">
+          <div className="mt-3 flex flex-col gap-2">
+            <p id="gen-platform-label" className="text-[15px] font-medium text-ui-text">
               Primary platform
-            </label>
-            <input
-              id="gen-platform"
-              value={platform}
-              onChange={(e) => setPlatform(e.target.value)}
-              className={fieldClass}
-              placeholder="Instagram, Facebook, LinkedIn, TikTok…"
-              maxLength={120}
-            />
+            </p>
+            <div
+              className="flex flex-wrap gap-2"
+              role="radiogroup"
+              aria-labelledby="gen-platform-label"
+            >
+              {GENERATION_PLATFORMS.map(({ id, label }) => {
+                const selected = platformId === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    onClick={() => setPlatformId(id)}
+                    className={[
+                      "rounded-none border px-4 py-2.5 text-sm font-medium transition",
+                      selected
+                        ? "border-black bg-black text-white"
+                        : "border-black/25 bg-ui-bg text-ui-text hover:border-black hover:bg-neutral-50",
+                    ].join(" ")}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -304,7 +328,7 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
                 hashtags, and visuals. Generate images from the Images section.
               </p>
               <p className="mt-1 text-xs text-ui-muted-dim">
-                {languageLabel(language)} · {platform.trim() || "any platform"}
+                {languageLabel(language)} · {generationPlatformLabel(platformId)}
                 {objective ? ` · ${OBJECTIVES.find((o) => o.value === objective)?.label ?? objective}` : ""}
               </p>
             </div>

@@ -4,6 +4,7 @@ import { AssetBlock } from "@/components/library/asset-block";
 import { PostPackBlock } from "@/components/library/post-pack-block";
 import { SummaryWithCopy } from "@/components/library/summary-with-copy";
 import { getCurrentOrganizationId } from "@/lib/org";
+import { formatPlatformForDisplay } from "@/lib/platforms";
 import { createClient } from "@/lib/supabase/server";
 
 type PageProps = { params: Promise<{ id: string }> };
@@ -66,7 +67,8 @@ export default async function LibraryDetailPage({ params }: PageProps) {
   } | null;
   const topic = typeof payload?.topic === "string" ? payload.topic : "Generation";
   const tone = typeof payload?.tone === "string" ? payload.tone : null;
-  const platform = typeof payload?.platform === "string" ? payload.platform : null;
+  const platformRaw = typeof payload?.platform === "string" ? payload.platform : null;
+  const platform = platformRaw ? formatPlatformForDisplay(platformRaw) : null;
   const language = typeof payload?.language === "string" ? payload.language : null;
   const objective =
     typeof payload?.objective === "string" && payload.objective.trim()

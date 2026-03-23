@@ -1,6 +1,7 @@
 "use client";
 
 import { CopyButton } from "@/components/ui/copy-button";
+import { formatPlatformForDisplay } from "@/lib/platforms";
 
 export type AssetDisplay = {
   id: string;
@@ -11,16 +12,18 @@ export type AssetDisplay = {
 };
 
 function copyText(a: AssetDisplay): string {
+  const platformLabel = formatPlatformForDisplay(a.platform);
   const lines = [
     a.title ? `${a.title}\n` : "",
     a.body ?? "",
-    a.platform ? `\n— ${a.platform}` : "",
+    platformLabel ? `\n— ${platformLabel}` : "",
   ].filter(Boolean);
   return lines.join("\n").trim();
 }
 
 export function AssetBlock({ asset }: { asset: AssetDisplay }) {
   const full = copyText(asset);
+  const platformLabel = formatPlatformForDisplay(asset.platform);
 
   return (
     <li className="border-b border-black px-0 py-8 last:border-b-0">
@@ -29,7 +32,7 @@ export function AssetBlock({ asset }: { asset: AssetDisplay }) {
           <span className="border border-black px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-ui-muted">
             {asset.asset_type.replace(/_/g, " ")}
           </span>
-          {asset.platform ? <span>{asset.platform}</span> : null}
+          {platformLabel ? <span>{platformLabel}</span> : null}
         </div>
         {full ? <CopyButton text={full} /> : null}
       </div>

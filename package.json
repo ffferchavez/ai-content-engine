@@ -9,6 +9,7 @@
     "lint": "eslint",
     "verify:env": "node scripts/verify-env.mjs",
     "db:migrate": "node scripts/run-migration.mjs",
+    "db:migrate:brand-urls": "node scripts/run-migration.mjs supabase/migrations/20250325000000_brand_urls.sql",
     "auth:urls": "node scripts/print-auth-urls.mjs"
   },
   "dependencies": {

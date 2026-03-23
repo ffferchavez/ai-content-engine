@@ -1,4 +1,5 @@
 import { BrandsPanel } from "@/components/brands/brands-panel";
+import { parseBrandUrlsFromDb } from "@/lib/brands/urls";
 import type { BrandRow } from "@/lib/brands/types";
 import { getCurrentOrganizationId } from "@/lib/org";
 import { createClient } from "@/lib/supabase/server";
@@ -26,7 +27,7 @@ export default async function BrandsPage() {
   const { data: rows, error } = await supabase
     .from("brands")
     .select(
-      "id, organization_id, name, description, voice_notes, target_audience, industry, brand_guidelines, default_language, created_at, updated_at",
+      "id, organization_id, name, description, voice_notes, target_audience, industry, brand_guidelines, brand_urls, default_language, created_at, updated_at",
     )
     .eq("organization_id", orgId)
     .order("updated_at", { ascending: false });
@@ -49,6 +50,7 @@ export default async function BrandsPage() {
       row.brand_guidelines !== null && typeof row.brand_guidelines === "object"
         ? (row.brand_guidelines as Record<string, unknown>)
         : null,
+    brand_urls: parseBrandUrlsFromDb(row.brand_urls),
   }));
 
   return (

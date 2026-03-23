@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import OpenAI, { APIError } from "openai";
 import { getOptionalOpenAIApiKey } from "@/lib/env/server";
 import {
   normalizeSuggestedFormat,
@@ -180,17 +180,41 @@ const OBJECTIVE_LABELS: Record<string, string> = {
   launch: "announcement or campaign push",
 };
 
-export async function runStructuredGeneration(params: {
-  brandName: string;
-  brandBlock: string;
-  topic: string;
-  platform?: string;
-  tone?: string;
-  /** ISO-ish code e.g. en, es */
-  language?: string;
-  /** e.g. awareness, leads */
-  objective?: string;
-}): Promise<StructuredPackResult> {
+const RETRY_USER_SUFFIX =
+  "CRITICAL: The top-level JSON must include post_packs as an array with length 3, 4, or 5 only (not 1, not 2, not 6+). Each object must include every required string field so nothing is dropped during validation.";
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+function shouldRetryStructuredAttempt(err: unknown): boolean {
+  if (err instanceof APIError) {
+    if (err.status === 401 || err.status === 403) return false;
+    return true;
+  }
+  if (!(err instanceof Error)) return false;
+  const m = err.message;
+  if (m.includes("OPENAI_API_KEY")) return false;
+  return (
+    m.includes("Expected 3–5 post packs") ||
+    m.includes("Model did not return valid JSON") ||
+    m.includes("Invalid JSON shape") ||
+    m.includes("Empty model response")
+  );
+}
+
+async function runStructuredGenerationOnce(
+  params: {
+    brandName: string;
+    brandBlock: string;
+    topic: string;
+    platform?: string;
+    tone?: string;
+    language?: string;
+    objective?: string;
+  },
+  options: { attemptIndex: number; appendRetryHint: boolean },
+): Promise<StructuredPackResult> {
   const apiKey = getOptionalOpenAIApiKey();
   if (!apiKey) {
     throw new Error("OPENAI_API_KEY is not set");
@@ -214,13 +238,16 @@ export async function runStructuredGeneration(params: {
       ? `Primary platform: ${params.platform} — hooks, caption length, line breaks, and hashtag style must match what performs there.`
       : "If no platform was given, choose sensible defaults per post (vary formats) and note the assumed platform in each post_angle only if helpful.",
     "Return 3–5 complete post_packs as specified. For carousel packs, include a slides array (3–7 slides). image_prompt may be null.",
+    options.appendRetryHint ? RETRY_USER_SUFFIX : "",
   ]
     .filter(Boolean)
     .join("\n\n");
 
+  const temperature = options.attemptIndex === 0 ? 0.72 : 0.55;
+
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
-    temperature: 0.72,
+    temperature,
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: SYSTEM },
@@ -259,4 +286,35 @@ export async function runStructuredGeneration(params: {
   }
 
   return { summary, post_packs };
+}
+
+export async function runStructuredGeneration(params: {
+  brandName: string;
+  brandBlock: string;
+  topic: string;
+  platform?: string;
+  tone?: string;
+  /** ISO-ish code e.g. en, es */
+  language?: string;
+  /** e.g. awareness, leads */
+  objective?: string;
+}): Promise<StructuredPackResult> {
+  const maxAttempts = 3;
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      return await runStructuredGenerationOnce(params, {
+        attemptIndex: attempt,
+        appendRetryHint: attempt > 0,
+      });
+    } catch (e) {
+      lastErr = e;
+      if (attempt < maxAttempts - 1 && shouldRetryStructuredAttempt(e)) {
+        await sleep(350 * (attempt + 1));
+        continue;
+      }
+      throw e;
+    }
+  }
+  throw lastErr;
 }

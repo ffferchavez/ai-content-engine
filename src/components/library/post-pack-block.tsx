@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { CopyButton } from "@/components/ui/copy-button";
 import { formatPostPackForCopy, parsePostPackFields } from "@/lib/generate/post-pack";
+import { formatPlatformForDisplay } from "@/lib/platforms";
 import { PostPackImageActions } from "@/components/library/post-pack-image-actions";
 import { PostPackSocialPreview } from "@/components/social-preview/post-pack-social-preview";
 
@@ -46,9 +47,11 @@ export function PostPackBlock({
     );
   }
 
+  const platformLabel = formatPlatformForDisplay(asset.platform);
+
   const copyText = formatPostPackForCopy({
     title: asset.title,
-    platform: asset.platform,
+    platform: platformLabel || null,
     fields: parsed,
   });
 
@@ -62,7 +65,7 @@ export function PostPackBlock({
           <span className="border border-black/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider">
             {parsed.suggested_format}
           </span>
-          {asset.platform ? <span>{asset.platform}</span> : null}
+          {platformLabel ? <span>{platformLabel}</span> : null}
         </div>
         {copyText ? <CopyButton text={copyText} label="Copy post pack" /> : null}
       </div>

@@ -3,7 +3,7 @@ import type { SuggestedFormat } from "@/lib/generate/post-pack";
 
 const MAX_DALLE_PROMPT = 3500;
 
-const TRANSFORMER_SYSTEM = `You write the final text prompt for DALL·E 3 (Helion Media — premium social content).
+const TRANSFORMER_SYSTEM = `You write the final text prompt for an image generation model (Helion Media — premium social content).
 
 You receive notes from a social post pack. The "visual direction" field is creative copy for humans — often too busy or literal for an image model.
 

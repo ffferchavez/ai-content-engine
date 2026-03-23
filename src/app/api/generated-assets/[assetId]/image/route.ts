@@ -1,7 +1,8 @@
-import { APIError } from "openai";
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import { getOptionalOpenAIApiKey } from "@/lib/env/server";
+import { mapImageProviderError } from "@/lib/generate/images/errors";
+import { generateImage } from "@/lib/generate/images/generate-image";
 import { allowPostPackImageGenerate } from "@/lib/generate/image-rate-limit";
 import {
   buildFallbackImagePrompt,
@@ -18,18 +19,6 @@ export const runtime = "nodejs";
 const BUCKET = "generated-media";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-function mapOpenAIImageError(err: unknown): string {
-  if (err instanceof APIError) {
-    if (err.status === 429) return "The AI is busy. Wait a minute and try again.";
-    if (err.status === 401) return "OpenAI key is invalid. Check OPENAI_API_KEY.";
-    if (err.status === 400 && err.message?.includes("content_policy"))
-      return "This prompt was rejected by the image model. Try adjusting your brief and visual direction.";
-    if (err.message) return err.message;
-  }
-  if (err instanceof Error) return err.message;
-  return "Image generation failed. Try again.";
-}
 
 export async function POST(
   request: Request,
@@ -181,33 +170,25 @@ export async function POST(
     prompt = buildFallbackImagePrompt(transformParams);
   }
 
-  let b64: string | undefined;
+  let buffer: Buffer;
+  let uploadContentType = "image/png";
   try {
-    const result = await openai.images.generate({
-      model: "dall-e-3",
+    const out = await generateImage({
       prompt,
-      n: 1,
-      size: "1024x1024",
-      response_format: "b64_json",
+      options: { size: "1024x1024", quality: "high" },
     });
-    b64 = result.data?.[0]?.b64_json;
+    buffer = out.buffer;
+    uploadContentType = out.mimeType;
   } catch (err) {
-    const friendly = mapOpenAIImageError(err);
-    return NextResponse.json({ error: friendly }, { status: 502 });
+    return NextResponse.json({ error: mapImageProviderError(err) }, { status: 502 });
   }
-
-  if (!b64) {
-    return NextResponse.json({ error: "No image returned from the model" }, { status: 502 });
-  }
-
-  const buffer = Buffer.from(b64, "base64");
 
   const storagePath = isCarousel
     ? `${orgId}/${asset.content_generation_id}/${asset.id}/slide-${parsed.slides[slideIndex!].slide_number}.png`
     : `${orgId}/${asset.content_generation_id}/${asset.id}.png`;
 
   const { error: uploadError } = await admin.storage.from(BUCKET).upload(storagePath, buffer, {
-    contentType: "image/png",
+    contentType: uploadContentType,
     upsert: true,
   });
 

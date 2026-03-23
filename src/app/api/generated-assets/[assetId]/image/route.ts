@@ -4,9 +4,10 @@ import { NextResponse } from "next/server";
 import { getOptionalOpenAIApiKey } from "@/lib/env/server";
 import { allowPostPackImageGenerate } from "@/lib/generate/image-rate-limit";
 import {
-  buildPostPackImagePrompt,
-  supportsPostPackImageGeneration,
-} from "@/lib/generate/post-pack-image";
+  buildFallbackImagePrompt,
+  transformImagePromptForPostPack,
+} from "@/lib/generate/post-pack-image-prompt";
+import { supportsPostPackImageGeneration } from "@/lib/generate/post-pack-image";
 import { parsePostPackFields } from "@/lib/generate/post-pack";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -31,12 +32,22 @@ function mapOpenAIImageError(err: unknown): string {
 }
 
 export async function POST(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ assetId: string }> },
 ) {
   const { assetId } = await context.params;
   if (!assetId || !UUID_RE.test(assetId)) {
     return NextResponse.json({ error: "Invalid asset" }, { status: 400 });
+  }
+
+  let slideIndex: number | undefined;
+  try {
+    const body = (await request.json()) as { slideIndex?: number };
+    if (typeof body.slideIndex === "number" && Number.isInteger(body.slideIndex)) {
+      slideIndex = body.slideIndex;
+    }
+  } catch {
+    /* empty or non-JSON body */
   }
 
   const supabase = await createClient();
@@ -62,7 +73,7 @@ export async function POST(
 
   const { data: asset, error: assetError } = await supabase
     .from("generated_assets")
-    .select("id, metadata, asset_type, content_generation_id")
+    .select("id, title, metadata, asset_type, content_generation_id")
     .eq("id", assetId)
     .maybeSingle();
 
@@ -99,6 +110,24 @@ export async function POST(
     );
   }
 
+  const isCarousel = parsed.suggested_format === "carousel" && parsed.slides.length > 0;
+  if (isCarousel) {
+    if (slideIndex === undefined) {
+      return NextResponse.json(
+        { error: "Carousel packs require slideIndex (0-based) in the JSON body." },
+        { status: 400 },
+      );
+    }
+    if (slideIndex < 0 || slideIndex >= parsed.slides.length) {
+      return NextResponse.json({ error: "Invalid slide index for this post pack." }, { status: 400 });
+    }
+  } else if (slideIndex !== undefined) {
+    return NextResponse.json(
+      { error: "slideIndex is only used for carousel post packs." },
+      { status: 400 },
+    );
+  }
+
   const apiKey = getOptionalOpenAIApiKey();
   if (!apiKey) {
     return NextResponse.json({ error: "OPENAI_API_KEY is not set" }, { status: 503 });
@@ -117,13 +146,40 @@ export async function POST(
     );
   }
 
-  const prompt = buildPostPackImagePrompt({
-    image_prompt: parsed.image_prompt,
-    visual_direction: parsed.visual_direction,
-    post_angle: parsed.post_angle,
-  });
-
   const openai = new OpenAI({ apiKey });
+
+  const transformParams = isCarousel
+    ? (() => {
+        const slide = parsed.slides[slideIndex!];
+        return {
+          post_angle: parsed.post_angle,
+          image_prompt: slide.image_prompt,
+          visual_direction: slide.visual_direction,
+          suggested_format: parsed.suggested_format,
+          title: asset.title ? `${asset.title} — slide ${slide.slide_number}` : `Slide ${slide.slide_number}`,
+          slideContext: {
+            slideNumber: slide.slide_number,
+            slideTitle: slide.title,
+            supportingText: slide.supporting_text,
+            totalSlides: parsed.slides.length,
+          },
+        };
+      })()
+    : {
+        post_angle: parsed.post_angle,
+        image_prompt: parsed.image_prompt,
+        visual_direction: parsed.visual_direction,
+        suggested_format: parsed.suggested_format,
+        title: asset.title,
+      };
+
+  let prompt: string;
+  try {
+    prompt = await transformImagePromptForPostPack(transformParams, openai);
+  } catch (err) {
+    console.error("[generated-assets/image] prompt transform:", err instanceof Error ? err.message : err);
+    prompt = buildFallbackImagePrompt(transformParams);
+  }
 
   let b64: string | undefined;
   try {
@@ -145,9 +201,12 @@ export async function POST(
   }
 
   const buffer = Buffer.from(b64, "base64");
-  const path = `${orgId}/${asset.content_generation_id}/${asset.id}.png`;
 
-  const { error: uploadError } = await admin.storage.from(BUCKET).upload(path, buffer, {
+  const storagePath = isCarousel
+    ? `${orgId}/${asset.content_generation_id}/${asset.id}/slide-${parsed.slides[slideIndex!].slide_number}.png`
+    : `${orgId}/${asset.content_generation_id}/${asset.id}.png`;
+
+  const { error: uploadError } = await admin.storage.from(BUCKET).upload(storagePath, buffer, {
     contentType: "image/png",
     upsert: true,
   });
@@ -160,7 +219,7 @@ export async function POST(
     );
   }
 
-  const { data: publicUrlData } = admin.storage.from(BUCKET).getPublicUrl(path);
+  const { data: publicUrlData } = admin.storage.from(BUCKET).getPublicUrl(storagePath);
   const imageUrl = publicUrlData.publicUrl;
 
   const prev =
@@ -168,13 +227,36 @@ export async function POST(
       ? { ...(asset.metadata as Record<string, unknown>) }
       : {};
 
-  const merged: Record<string, unknown> = {
-    ...prev,
-    image_url: imageUrl,
-    media_url: imageUrl,
-    media_status: "ready",
-    image_generated_at: new Date().toISOString(),
-  };
+  let merged: Record<string, unknown>;
+
+  if (isCarousel) {
+    const slides = parsed.slides.map((s) => ({ ...s }));
+    const idx = slideIndex!;
+    const prevSlide = slides[idx];
+    slides[idx] = {
+      ...prevSlide,
+      image_url: imageUrl,
+      media_url: imageUrl,
+      media_status: "ready",
+    };
+    const allReady = slides.every((s) => s.image_url);
+    merged = {
+      ...prev,
+      slides,
+      media_status: allReady ? "ready" : "not_generated",
+      image_url: allReady ? slides[0]?.image_url ?? null : null,
+      media_url: allReady ? slides[0]?.image_url ?? null : null,
+      image_generated_at: new Date().toISOString(),
+    };
+  } else {
+    merged = {
+      ...prev,
+      image_url: imageUrl,
+      media_url: imageUrl,
+      media_status: "ready",
+      image_generated_at: new Date().toISOString(),
+    };
+  }
 
   const { error: updateError } = await supabase
     .from("generated_assets")
@@ -189,5 +271,6 @@ export async function POST(
   return NextResponse.json({
     imageUrl,
     metadata: merged,
+    slideIndex: isCarousel ? slideIndex : undefined,
   });
 }

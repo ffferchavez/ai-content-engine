@@ -45,8 +45,12 @@ export function AppShell({
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
-    <div className="flex min-h-[100dvh] min-h-screen flex-1 flex-col bg-[#fafafa]">
-      <header className={APP_HEADER_CLASS}>
+    <div
+      className="flex min-h-[100dvh] min-h-screen flex-1 flex-col bg-[#fafafa]"
+      // Browser extensions often inject nodes/styles before hydration; suppress mismatch on this shell root.
+      suppressHydrationWarning
+    >
+      <header className={APP_HEADER_CLASS} suppressHydrationWarning>
         <div
           className={`${PAGE_INSET} flex flex-wrap items-center justify-between gap-x-4 gap-y-3 py-3 sm:gap-x-6 sm:py-4`}
         >

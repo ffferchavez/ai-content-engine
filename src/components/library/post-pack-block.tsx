@@ -82,6 +82,25 @@ export function PostPackBlock({
         <p className="whitespace-pre-wrap">{parsed.visual_direction}</p>
       </Field>
 
+      {parsed.suggested_format === "carousel" && parsed.slides.length > 0 ? (
+        <Field label="Carousel slides">
+          <ol className="mt-2 list-decimal space-y-4 pl-5">
+            {parsed.slides.map((s) => (
+              <li key={s.slide_number} className="text-sm">
+                <p className="font-medium text-ui-text">{s.title}</p>
+                {s.supporting_text ? (
+                  <p className="mt-1 whitespace-pre-wrap text-ui-muted">{s.supporting_text}</p>
+                ) : null}
+                <p className="mt-2 whitespace-pre-wrap text-ui-muted-dim">{s.visual_direction}</p>
+                {s.image_prompt ? (
+                  <p className="mt-1 text-xs text-ui-muted-dim">Image prompt: {s.image_prompt}</p>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        </Field>
+      ) : null}
+
       <PostPackImageActions
         assetId={asset.id}
         metadata={asset.metadata}

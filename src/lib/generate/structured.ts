@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import { getOptionalOpenAIApiKey } from "@/lib/env/server";
 import {
   normalizeSuggestedFormat,
+  parseSlidesArray,
   type PostPackFields,
   type SuggestedFormat,
 } from "@/lib/generate/post-pack";
@@ -19,54 +20,83 @@ const SYSTEM = `You are the Helion Media social studio. Helion helps real busine
 
 Output ONE JSON object only. No markdown fences, no commentary outside JSON.
 
-## Output shape (exact keys)
+## post_packs item shape (depends on suggested_format)
+
+### A) static post, reel, or story
+Use pack-level fields only. Omit "slides" or set "slides": null.
 {
-  "summary": "One sentence: what this batch is for and how the 3–5 posts differ.",
-  "post_packs": [
+  "title": "...",
+  "post_angle": "...",
+  "suggested_format": "static post" | "reel" | "story",
+  "hook": "...",
+  "caption": "...",
+  "call_to_action": "...",
+  "hashtags": "...",
+  "visual_direction": "Practical art direction for a single image or concept",
+  "image_prompt": "Optional short line for image generation, or null (reel/story: often null)"
+}
+
+### B) carousel (multi-slide; required)
+Include pack-level hook/caption/CTA/hashtags for the overall post PLUS a "slides" array (3 to 7 slides).
+Pack-level "visual_direction" = short overview of how the carousel flows (1–3 sentences).
+Pack-level "image_prompt" may be null (per-slide prompts live on slides).
+{
+  "title": "...",
+  "post_angle": "...",
+  "suggested_format": "carousel",
+  "hook": "...",
+  "caption": "Full caption; can reference swiping through slides",
+  "call_to_action": "...",
+  "hashtags": "...",
+  "visual_direction": "How the carousel reads as a whole; narrative arc across slides",
+  "image_prompt": null,
+  "slides": [
     {
-      "title": "Short internal label for this post (not clickbait)",
-      "post_angle": "The single idea or POV this post commits to",
-      "suggested_format": "carousel" | "reel" | "static post" | "story",
-      "hook": "First line or on-screen opener — tight, speakable, fits the platform",
-      "caption": "Full caption with natural line breaks; length should match the platform norms in the user message",
-      "call_to_action": "One concrete next step (comment, save, DM, link in bio, book, etc.)",
-      "hashtags": "Realistic set for the platform — not spammy; use # where appropriate or plain words if the platform rarely uses hashtags",
-      "visual_direction": "Practical art direction: composition, subject, lighting mood, text overlay placement — what a designer or photographer could execute",
-      "image_prompt": "Optional: ONE short English line a future image model could use (subject + style). Use null if not needed."
+      "slide_number": 1,
+      "title": "Short slide headline",
+      "supporting_text": "On-slide copy idea or bullet (not literal text to render in an image)",
+      "visual_direction": "What this slide should show — one clear visual idea",
+      "image_prompt": "Optional one-line image brief for this slide, or null"
     }
   ]
 }
 
+Carousel rules:
+- slides array MUST have between 3 and 7 items; slide_number must be 1..N in order with no gaps.
+- Each slide is one distinct visual beat; avoid repeating the same composition.
+- This app generates still images per slide later — not video.
+
 ## Helion quality bar
 - Write like someone who posts for this brand weekly: concrete nouns, real scenarios, specific details from the brand context.
-- Each pack is ONE complete post, not a bucket of parts. Hook + caption + CTA + hashtags + visuals must feel like the same post.
+- Each pack is ONE complete post. Hook + caption + CTA + hashtags + visuals must feel cohesive.
 - Make the 3–5 packs clearly different (angle, format, hook) — not small rewrites of the same idea.
 
 ## Platform awareness (when the user names a platform, follow it strictly)
-- Instagram: punchy hook, short paragraphs or single block, strong visual_direction; carousels = slide-by-slide beats in visual_direction if format is carousel.
-- Facebook: slightly warmer, community-oriented language; hooks can be a full first sentence.
-- LinkedIn: professional but not stiff; line breaks for skim-reading; avoid hashtag walls; hooks often work as a standalone first line.
-- TikTok-style / short-form: ultra-tight hook; caption can reference on-screen text; still no video file — text only.
+- Instagram: punchy hook; carousels = clear slide progression.
+- Facebook: slightly warmer, community-oriented language.
+- LinkedIn: professional but not stiff; carousels can be educational step-by-step.
+- TikTok-style / short-form: ultra-tight hook; still no video file — text only.
 
 ## Format field (suggested_format)
-- "static post" and "carousel" are preferred for LinkedIn and many B2B cases.
+- "static post": single-image feed post.
+- "carousel": MUST include full "slides" array (3–7 slides).
 - "story" for ephemeral, vertical, time-bound angles.
-- "reel": ONLY as a *concept* — shot list + on-screen text ideas in hook/visual_direction. This app does NOT produce video files; never imply exported video or editing timelines.
+- "reel": ONLY as a *concept* — no video files; never imply exported video.
 
 ## Language
-- Write every user-facing string in the language specified in the user message (hook, caption, CTA, hashtags as appropriate for that locale). If the language is English, use the brand's market (US/UK) vocabulary from context.
+- Write every user-facing string in the language specified in the user message.
 
 ## Objective
-- Align CTA and tone with the campaign objective in the user message (e.g. awareness vs leads).
+- Align CTA and tone with the campaign objective in the user message.
 
 ## Banned patterns (unless the brand voice explicitly uses them)
 - "In today's fast-paced world", "unlock", "elevate your brand", "game-changer", "synergy", "leverage", "cutting-edge", "digital transformation", "join us on a journey".
-- Empty superlatives ("best ever") without proof or brand voice.
-- Generic questions as hooks ("Did you know…?") unless they are specific.
+- Empty superlatives without proof or brand voice.
 
 ## Rules
 - Exactly 3, 4, or 5 items in post_packs — never fewer, never more.
-- Every required string field must be non-empty. Use null only for image_prompt when omitting it.
+- For carousel packs: slides array is REQUIRED with 3–7 slides. For non-carousel: do not include slides.
+- Every required string field must be non-empty where specified. Use null for image_prompt when omitting.
 - suggested_format must be one of: carousel, reel, static post, story.`;
 
 function isNonEmptyString(v: unknown): v is string {
@@ -98,6 +128,22 @@ function parsePostPackItem(raw: unknown): SocialPostPack | null {
     ? normalizeSuggestedFormat(fmtRaw)
     : "static post") as SuggestedFormat;
   const image_prompt = parseOptionalImagePrompt(o.image_prompt);
+
+  let slides = parseSlidesArray(o.slides).map((s) => ({
+    ...s,
+    image_url: null as string | null,
+    media_url: null as string | null,
+    media_status: "not_generated" as const,
+  }));
+
+  if (suggested_format === "carousel") {
+    if (slides.length < 3 || slides.length > 7) {
+      return null;
+    }
+  } else {
+    slides = [];
+  }
+
   return {
     title,
     post_angle,
@@ -111,6 +157,7 @@ function parsePostPackItem(raw: unknown): SocialPostPack | null {
     image_url: null,
     media_url: null,
     media_status: "not_generated",
+    slides,
   };
 }
 
@@ -166,7 +213,7 @@ export async function runStructuredGeneration(params: {
     params.platform
       ? `Primary platform: ${params.platform} — hooks, caption length, line breaks, and hashtag style must match what performs there.`
       : "If no platform was given, choose sensible defaults per post (vary formats) and note the assumed platform in each post_angle only if helpful.",
-    "Return 3–5 complete post_packs as specified. image_prompt may be null on any item.",
+    "Return 3–5 complete post_packs as specified. For carousel packs, include a slides array (3–7 slides). image_prompt may be null.",
   ]
     .filter(Boolean)
     .join("\n\n");

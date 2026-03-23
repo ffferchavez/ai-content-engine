@@ -176,6 +176,7 @@ export async function POST(request: Request) {
         image_url: p.image_url,
         media_url: p.media_url,
         media_status: p.media_status,
+        slides: p.slides,
       },
     }));
 

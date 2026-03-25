@@ -9,6 +9,7 @@ type Props = {
   platform: string | null;
   parsed: PostPackFields;
   packTitle: string | null;
+  size?: "default" | "large";
 };
 
 function initials(name: string): string {
@@ -81,7 +82,7 @@ function IgHeader({ brandName }: { brandName: string }) {
   return (
     <div className="flex items-center gap-2 border-b border-black/5 px-3 py-2.5">
       <div
-        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 via-pink-500 to-purple-600 text-[11px] font-semibold text-white"
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-amber-400 via-pink-500 to-purple-600 text-[11px] font-semibold text-white"
         aria-hidden
       >
         {initials(brandName)}
@@ -114,26 +115,27 @@ function FbHeader({ brandName }: { brandName: string }) {
   );
 }
 
-function InstagramStaticPreview({ brandName, parsed, packTitle }: Props) {
+function InstagramStaticPreview({ brandName, parsed, packTitle, size = "default" }: Props) {
+  const maxWidth = size === "large" ? "max-w-[460px]" : "max-w-[400px]";
+  const maxHeight = size === "large" ? "max-h-[min(88vw,460px)]" : "max-h-[min(85vw,400px)]";
+
   return (
-    <div className="mx-auto w-full max-w-[400px] overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm">
+    <div className={`mx-auto w-full ${maxWidth} overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm`}>
       <IgHeader brandName={brandName} />
-      <PreviewImage
-        src={parsed.image_url}
-        alt=""
-        aspectClass="aspect-square max-h-[min(85vw,400px)]"
-      />
+      <PreviewImage src={parsed.image_url} alt="" aspectClass={`aspect-square ${maxHeight}`} />
       <CaptionBlock parsed={parsed} packTitle={packTitle} compact />
     </div>
   );
 }
 
-function InstagramCarouselPreview({ brandName, parsed, packTitle }: Props) {
+function InstagramCarouselPreview({ brandName, parsed, packTitle, size = "default" }: Props) {
   const slides = parsed.slides;
   const [idx, setIdx] = useState(0);
   const active = slides[idx] ?? slides[0];
   const src = active?.image_url ?? null;
   const n = slides.length;
+  const maxWidth = size === "large" ? "max-w-[460px]" : "max-w-[400px]";
+  const maxHeight = size === "large" ? "max-h-[min(88vw,460px)]" : "max-h-[min(85vw,400px)]";
 
   const go = (d: number) => {
     setIdx((i) => {
@@ -145,14 +147,10 @@ function InstagramCarouselPreview({ brandName, parsed, packTitle }: Props) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[400px] overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm">
+    <div className={`mx-auto w-full ${maxWidth} overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm`}>
       <IgHeader brandName={brandName} />
       <div className="relative bg-black/5">
-        <PreviewImage
-          src={src}
-          alt={active ? `Slide ${active.slide_number}` : ""}
-          aspectClass="aspect-square max-h-[min(85vw,400px)]"
-        />
+        <PreviewImage src={src} alt={active ? `Slide ${active.slide_number}` : ""} aspectClass={`aspect-square ${maxHeight}`} />
         <p className="absolute right-2 top-2 rounded bg-black/45 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur-sm">
           {idx + 1} / {n}
         </p>
@@ -197,18 +195,17 @@ function InstagramCarouselPreview({ brandName, parsed, packTitle }: Props) {
   );
 }
 
-function FacebookStaticPreview({ brandName, parsed, packTitle }: Props) {
+function FacebookStaticPreview({ brandName, parsed, packTitle, size = "default" }: Props) {
+  const maxWidth = size === "large" ? "max-w-[620px]" : "max-w-[500px]";
+  const maxHeight = size === "large" ? "max-h-[min(72vw,500px)]" : "max-h-[min(70vw,420px)]";
+
   return (
-    <div className="mx-auto w-full max-w-[500px] overflow-hidden rounded-lg border border-[#dddfe2] bg-white shadow-sm">
+    <div className={`mx-auto w-full ${maxWidth} overflow-hidden rounded-lg border border-[#dddfe2] bg-white shadow-sm`}>
       <FbHeader brandName={brandName} />
       <p className="px-3 pb-2 text-[15px] leading-snug text-[#050505]">
         <span className="font-semibold">{parsed.hook}</span>
       </p>
-      <PreviewImage
-        src={parsed.image_url}
-        alt=""
-        aspectClass="aspect-[1.91/1] max-h-[min(70vw,420px)] bg-[#f0f2f5]"
-      />
+      <PreviewImage src={parsed.image_url} alt="" aspectClass={`aspect-[1.91/1] ${maxHeight} bg-[#f0f2f5]`} />
       <div className="bg-[#f0f2f5] px-3 py-2.5">
         <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[#050505]">{parsed.caption}</p>
         {parsed.call_to_action ? (
@@ -221,12 +218,14 @@ function FacebookStaticPreview({ brandName, parsed, packTitle }: Props) {
   );
 }
 
-function FacebookCarouselPreview({ brandName, parsed, packTitle }: Props) {
+function FacebookCarouselPreview({ brandName, parsed, packTitle, size = "default" }: Props) {
   const slides = parsed.slides;
   const [idx, setIdx] = useState(0);
   const active = slides[idx] ?? slides[0];
   const src = active?.image_url ?? null;
   const n = slides.length;
+  const maxWidth = size === "large" ? "max-w-[620px]" : "max-w-[500px]";
+  const maxHeight = size === "large" ? "max-h-[min(72vw,500px)]" : "max-h-[min(70vw,420px)]";
 
   const go = (d: number) => {
     setIdx((i) => {
@@ -238,17 +237,13 @@ function FacebookCarouselPreview({ brandName, parsed, packTitle }: Props) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[500px] overflow-hidden rounded-lg border border-[#dddfe2] bg-white shadow-sm">
+    <div className={`mx-auto w-full ${maxWidth} overflow-hidden rounded-lg border border-[#dddfe2] bg-white shadow-sm`}>
       <FbHeader brandName={brandName} />
       <p className="px-3 pb-2 text-[15px] leading-snug text-[#050505]">
         <span className="font-semibold">{parsed.hook}</span>
       </p>
       <div className="relative bg-[#f0f2f5]">
-        <PreviewImage
-          src={src}
-          alt={active ? `Slide ${active.slide_number}` : ""}
-          aspectClass="aspect-[1.91/1] max-h-[min(70vw,420px)]"
-        />
+        <PreviewImage src={src} alt={active ? `Slide ${active.slide_number}` : ""} aspectClass={`aspect-[1.91/1] ${maxHeight}`} />
         <p className="absolute right-2 top-2 rounded bg-black/60 px-2 py-0.5 text-[11px] font-medium text-white">
           {idx + 1} / {n}
         </p>

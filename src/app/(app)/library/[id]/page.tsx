@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AssetBlock } from "@/components/library/asset-block";
-import { PostPackBlock } from "@/components/library/post-pack-block";
+import { LibraryDetailPostPacks } from "@/components/library/library-detail-post-packs";
 import { SummaryWithCopy } from "@/components/library/summary-with-copy";
 import { getCurrentOrganizationId } from "@/lib/org";
 import { formatPlatformForDisplay } from "@/lib/platforms";
@@ -58,6 +58,8 @@ export default async function LibraryDetailPage({ params }: PageProps) {
     .order("sort_order", { ascending: true });
 
   const assets = assetRows ?? [];
+  const postPacks = assets.filter((asset) => asset.asset_type === "post_pack");
+  const otherAssets = assets.filter((asset) => asset.asset_type !== "post_pack");
   const payload = gen.input_payload as {
     topic?: string;
     tone?: string;
@@ -114,40 +116,36 @@ export default async function LibraryDetailPage({ params }: PageProps) {
 
       {summary ? <SummaryWithCopy text={summary} /> : null}
 
-      {assets.length > 0 ? (
+      {postPacks.length > 0 ? (
+        <LibraryDetailPostPacks
+          brandName={brandName}
+          postPacks={postPacks.map((a) => ({
+            id: a.id,
+            asset_type: a.asset_type,
+            platform: a.platform,
+            title: a.title,
+            body: a.body,
+            metadata: a.metadata,
+          }))}
+        />
+      ) : null}
+
+      {otherAssets.length > 0 ? (
         <section>
-          <h2 className="text-[10px] font-medium uppercase tracking-[0.25em] text-ui-muted-dim">
-            Post packs
-          </h2>
+          <h2 className="text-[10px] font-medium uppercase tracking-[0.25em] text-ui-muted-dim">Other assets</h2>
           <ul className="mt-6 border-t border-black">
-            {assets.map((a, i) =>
-              a.asset_type === "post_pack" ? (
-                <PostPackBlock
-                  key={a.id}
-                  brandName={brandName}
-                  asset={{
-                    id: a.id,
-                    asset_type: a.asset_type,
-                    platform: a.platform,
-                    title: a.title,
-                    body: a.body,
-                    metadata: a.metadata,
-                  }}
-                  index={i}
-                />
-              ) : (
-                <AssetBlock
-                  key={a.id}
-                  asset={{
-                    id: a.id,
-                    asset_type: a.asset_type,
-                    platform: a.platform,
-                    title: a.title,
-                    body: a.body,
-                  }}
-                />
-              ),
-            )}
+            {otherAssets.map((a) => (
+              <AssetBlock
+                key={a.id}
+                asset={{
+                  id: a.id,
+                  asset_type: a.asset_type,
+                  platform: a.platform,
+                  title: a.title,
+                  body: a.body,
+                }}
+              />
+            ))}
           </ul>
         </section>
       ) : gen.status === "completed" ? (

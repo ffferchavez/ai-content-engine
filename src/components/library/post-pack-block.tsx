@@ -30,6 +30,7 @@ export function PostPackBlock({
   index,
   brandName = "Brand",
   onAssetMetadataUpdate,
+  layout = "stacked",
 }: {
   asset: PostPackAssetRow;
   index: number;
@@ -37,6 +38,8 @@ export function PostPackBlock({
   brandName?: string;
   /** Merge updated metadata in parent lists (Create page). */
   onAssetMetadataUpdate?: (assetId: string, metadata: unknown) => void;
+  /** Visual arrangement for different surfaces. */
+  layout?: "stacked" | "split";
 }) {
   const parsed = parsePostPackFields(asset.metadata);
   if (!parsed) {
@@ -54,6 +57,102 @@ export function PostPackBlock({
     platform: platformLabel || null,
     fields: parsed,
   });
+
+  if (layout === "split") {
+    return (
+      <li className="border-b border-black px-0 py-8 last:border-b-0">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-ui-muted-dim">
+            <span className="border border-black px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-ui-muted">
+              Post pack {index + 1}
+            </span>
+            <span className="border border-black/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider">
+              {parsed.suggested_format}
+            </span>
+            {platformLabel ? <span>{platformLabel}</span> : null}
+          </div>
+          {copyText ? <CopyButton text={copyText} label="Copy post pack" /> : null}
+        </div>
+
+        {asset.title ? (
+          <h3 className="mt-4 text-lg font-medium tracking-[-0.02em] text-ui-text">{asset.title}</h3>
+        ) : null}
+
+        <div className="mt-6 grid gap-8 xl:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
+          <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
+            <div className="rounded-none border border-black/20 bg-ui-bg p-4 sm:p-5">
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-ui-muted-dim">Preview</p>
+              <p className="mt-1 text-xs text-ui-muted-dim">
+                Platform-inspired layout — not an official Instagram or Facebook UI.
+              </p>
+              <div className="mt-4">
+                <PostPackSocialPreview
+                  brandName={brandName}
+                  platform={asset.platform}
+                  parsed={parsed}
+                  packTitle={asset.title}
+                />
+              </div>
+            </div>
+
+            <PostPackImageActions
+              assetId={asset.id}
+              metadata={asset.metadata}
+              packTitle={asset.title}
+              onMetadataUpdated={
+                onAssetMetadataUpdate ? (m) => onAssetMetadataUpdate(asset.id, m) : undefined
+              }
+            />
+
+            <p className="text-xs text-ui-muted-dim">
+              Video and reel rendering are not supported.{" "}
+              <span className="font-mono text-[11px]">media_url</span> is reserved for future non-image
+              assets.
+            </p>
+          </aside>
+
+          <div className="min-w-0">
+            <Field label="Angle">{parsed.post_angle}</Field>
+            <Field label="Hook">
+              <p className="whitespace-pre-wrap font-medium text-ui-text">{parsed.hook}</p>
+            </Field>
+            <Field label="Caption">
+              <p className="whitespace-pre-wrap">{parsed.caption}</p>
+            </Field>
+            <Field label="Call to action">{parsed.call_to_action}</Field>
+            <Field label="Hashtags">
+              <p className="whitespace-pre-wrap text-ui-text">{parsed.hashtags}</p>
+            </Field>
+            <Field label="Visual direction">
+              <p className="whitespace-pre-wrap">{parsed.visual_direction}</p>
+            </Field>
+
+            {parsed.suggested_format === "carousel" && parsed.slides.length > 0 ? (
+              <details className="mt-5 border border-black/20 bg-ui-bg p-4">
+                <summary className="cursor-pointer text-[10px] font-medium uppercase tracking-[0.2em] text-ui-muted-dim">
+                  Carousel slides ({parsed.slides.length})
+                </summary>
+                <ol className="mt-3 list-decimal space-y-4 pl-5">
+                  {parsed.slides.map((s) => (
+                    <li key={s.slide_number} className="text-sm">
+                      <p className="font-medium text-ui-text">{s.title}</p>
+                      {s.supporting_text ? (
+                        <p className="mt-1 whitespace-pre-wrap text-ui-muted">{s.supporting_text}</p>
+                      ) : null}
+                      <p className="mt-2 whitespace-pre-wrap text-ui-muted-dim">{s.visual_direction}</p>
+                      {s.image_prompt ? (
+                        <p className="mt-1 text-xs text-ui-muted-dim">Image prompt: {s.image_prompt}</p>
+                      ) : null}
+                    </li>
+                  ))}
+                </ol>
+              </details>
+            ) : null}
+          </div>
+        </div>
+      </li>
+    );
+  }
 
   return (
     <li className="border-b border-black px-0 py-8 last:border-b-0">

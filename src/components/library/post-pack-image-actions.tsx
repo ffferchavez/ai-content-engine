@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { parsePostPackFields, type PostPackFields } from "@/lib/generate/post-pack";
 import { supportsPostPackImageGeneration } from "@/lib/generate/post-pack-image";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 type PostPackImageActionsProps = {
   assetId: string;
@@ -29,6 +30,8 @@ export function PostPackImageActions({
   const [loadingSlide, setLoadingSlide] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<{ src: string; alt: string } | null>(null);
+  const isDesktopOrTablet = useMediaQuery("(min-width: 768px)");
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     setMetadata(initialMetadata);
@@ -41,6 +44,7 @@ export function PostPackImageActions({
   const hasStaticImage = Boolean(
     parsed?.suggested_format === "static post" && parsed.image_url && parsed.media_status === "ready",
   );
+  const showContent = isDesktopOrTablet || mobileOpen;
 
   async function runGenerate(slideIdx?: number) {
     setLoading(true);
@@ -82,21 +86,39 @@ export function PostPackImageActions({
   }
 
   return (
-    <div className="mt-6 border border-dashed border-black/30 bg-ui-bg/50 p-4">
-      <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-ui-muted-dim">Images</p>
+    <div className="mt-6 border border-dashed border-black/30 bg-ui-bg/50 p-4 text-center md:text-left">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-ui-muted-dim">Images</p>
+        {!isDesktopOrTablet ? (
+          <button
+            type="button"
+            onClick={() => setMobileOpen((open) => !open)}
+            className="rounded-none border border-black/30 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-ui-text transition hover:border-black"
+            aria-expanded={mobileOpen}
+            aria-controls={`post-pack-images-${assetId}`}
+          >
+            {mobileOpen ? "Hide" : "Show"}
+          </button>
+        ) : null}
+      </div>
 
-      {!canGenerate ? (
-        <p className="mt-2 text-sm text-ui-muted-dim">
-          Image generation is available for <span className="text-ui-muted">static posts</span> and{" "}
-          <span className="text-ui-muted">carousels</span>. Reel and story packs keep visual direction as
-          copy-only.
-        </p>
-      ) : isCarousel ? (
-        <>
-          <p className="mt-2 text-sm text-ui-muted-dim">
-            Generate one image per slide. Slides are stored in this post pack&rsquo;s metadata.
+      <div id={`post-pack-images-${assetId}`}>
+        {!showContent ? (
+          <p className="mt-2 text-sm text-ui-muted-dim md:hidden">
+            Expand to manage generated images for this post pack.
           </p>
-          <ul className="mt-4 grid grid-cols-3 gap-3 border-t border-black/20 pt-4">
+        ) : !canGenerate ? (
+          <p className="mt-2 text-sm text-ui-muted-dim">
+            Image generation is available for <span className="text-ui-muted">static posts</span> and{" "}
+            <span className="text-ui-muted">carousels</span>. Reel and story packs keep visual direction as
+            copy-only.
+          </p>
+        ) : isCarousel ? (
+          <>
+            <p className="mt-2 text-sm text-ui-muted-dim">
+              Generate one image per slide. Slides are stored in this post pack&rsquo;s metadata.
+            </p>
+            <ul className="mt-4 grid grid-cols-2 gap-3 border-t border-black/20 pt-4 md:grid-cols-3">
             {parsed.slides.map((slide, idx) => {
               const slideReady = Boolean(slide.image_url && slide.media_status === "ready");
               const busy = loading && loadingSlide === idx;
@@ -156,7 +178,7 @@ export function PostPackImageActions({
                       </button>
                     </figure>
                   ) : null}
-                  <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex flex-wrap items-center justify-center gap-3 md:justify-start">
                     <button
                       type="button"
                       onClick={() => runGenerate(idx)}
@@ -174,97 +196,102 @@ export function PostPackImageActions({
                 </li>
               );
             })}
-          </ul>
-          {error ? (
-            <p className="mt-3 text-sm text-red-700" role="alert">
-              {error}
-            </p>
-          ) : null}
-          <p className="mt-4 text-xs text-ui-muted-dim">
-            <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-ui-muted-dim">
-              Pack status
-            </span>
-            <span className="ml-2 text-ui-muted">
-              {parsed.media_status === "ready" && parsed.slides.every((s) => s.image_url)
-                ? "All slides ready"
-                : `${parsed.slides.filter((s) => s.image_url).length}/${parsed.slides.length} slides with images`}
-            </span>
-          </p>
-        </>
-      ) : (
-        <>
-          {!hideGeneratedImagePreviews && hasStaticImage && parsed.image_url ? (
-            <figure className="mt-3">
-              <button
-                type="button"
-                onClick={() =>
-                  setImagePreview({
-                    src: parsed.image_url!,
-                    alt: packTitle ? `Generated image for ${packTitle}` : "Generated post image",
-                  })
-                }
-                className="group relative block w-full max-w-lg"
-                aria-label="Preview generated image"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element -- dynamic Supabase public URL */}
-                <img
-                  src={parsed.image_url}
-                  alt={packTitle ? `Generated image for ${packTitle}` : "Generated post image"}
-                  className="max-h-[min(70vh,640px)] w-full border border-black object-contain transition group-hover:border-black/70"
-                />
-                <span className="pointer-events-none absolute right-2 top-2 inline-flex items-center gap-1 border border-white/70 bg-black/55 px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-white">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <path
-                      d="M14 5h5v5M19 5l-7 7M10 19H5v-5M5 19l7-7"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  Expand
-                </span>
-              </button>
-            </figure>
-          ) : null}
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={() => runGenerate()}
-              disabled={loading}
-              className="rounded-none border border-black bg-black px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loading ? "Generating…" : hasStaticImage ? "Regenerate image" : "Generate image"}
-            </button>
-            {loading ? (
-              <span className="text-sm text-ui-muted-dim">Creating image with AI — usually under a minute.</span>
-            ) : null}
-          </div>
-          {error ? (
-            <p className="mt-3 text-sm text-red-700" role="alert">
-              {error}
-            </p>
-          ) : null}
-          <div className="mt-4 text-xs text-ui-muted-dim">
-            <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-ui-muted-dim">Status</span>
-            <span className="ml-2 text-ui-muted">
-              {parsed.media_status === "ready" && parsed.image_url
-                ? "Ready"
-                : parsed.media_status === "pending"
-                  ? "Pending"
-                  : "Not generated"}
-            </span>
-            {parsed.image_prompt ? (
-              <p className="mt-3">
-                <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-ui-muted-dim">
-                  Image prompt used
-                </span>
-                <span className="mt-1 block whitespace-pre-wrap text-sm text-ui-text">{parsed.image_prompt}</span>
+            </ul>
+            {error ? (
+              <p className="mt-3 text-sm text-red-700" role="alert">
+                {error}
               </p>
             ) : null}
-          </div>
-        </>
-      )}
+            <p className="mt-4 text-xs text-ui-muted-dim">
+              <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-ui-muted-dim">
+                Pack status
+              </span>
+              <span className="ml-2 text-ui-muted">
+                {parsed.media_status === "ready" && parsed.slides.every((s) => s.image_url)
+                  ? "All slides ready"
+                  : `${parsed.slides.filter((s) => s.image_url).length}/${parsed.slides.length} slides with images`}
+              </span>
+            </p>
+          </>
+        ) : (
+          <>
+            {!hideGeneratedImagePreviews && hasStaticImage && parsed.image_url ? (
+              <figure className="mt-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setImagePreview({
+                      src: parsed.image_url!,
+                      alt: packTitle ? `Generated image for ${packTitle}` : "Generated post image",
+                    })
+                  }
+                  className="group relative block w-full max-w-lg"
+                  aria-label="Preview generated image"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element -- dynamic Supabase public URL */}
+                  <img
+                    src={parsed.image_url}
+                    alt={packTitle ? `Generated image for ${packTitle}` : "Generated post image"}
+                    className="max-h-[min(70vh,640px)] w-full border border-black object-contain transition group-hover:border-black/70"
+                  />
+                  <span className="pointer-events-none absolute right-2 top-2 inline-flex items-center gap-1 border border-white/70 bg-black/55 px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-white">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
+                      <path
+                        d="M14 5h5v5M19 5l-7 7M10 19H5v-5M5 19l7-7"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    Expand
+                  </span>
+                </button>
+              </figure>
+            ) : null}
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3 md:justify-start">
+              <button
+                type="button"
+                onClick={() => runGenerate()}
+                disabled={loading}
+                className="rounded-none border border-black bg-black px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? "Generating…" : hasStaticImage ? "Regenerate image" : "Generate image"}
+              </button>
+              {loading ? (
+                <span className="text-sm text-ui-muted-dim">Creating image with AI — usually under a minute.</span>
+              ) : null}
+            </div>
+            {error ? (
+              <p className="mt-3 text-sm text-red-700" role="alert">
+                {error}
+              </p>
+            ) : null}
+            <div className="mt-4 text-xs text-ui-muted-dim">
+              <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-ui-muted-dim">
+                Status
+              </span>
+              <span className="ml-2 text-ui-muted">
+                {parsed.media_status === "ready" && parsed.image_url
+                  ? "Ready"
+                  : parsed.media_status === "pending"
+                    ? "Pending"
+                    : "Not generated"}
+              </span>
+              {parsed.image_prompt ? (
+                <p className="mt-3">
+                  <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-ui-muted-dim">
+                    Image prompt used
+                  </span>
+                  <span className="mt-1 block whitespace-pre-wrap text-sm text-ui-text">
+                    {parsed.image_prompt}
+                  </span>
+                </p>
+              ) : null}
+            </div>
+          </>
+        )}
+      </div>
 
       {imagePreview ? (
         <div

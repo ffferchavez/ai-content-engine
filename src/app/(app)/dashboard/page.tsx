@@ -10,20 +10,20 @@ const rows = [
   {
     href: "/brands",
     kicker: "Brands",
-    title: "Manage brand profiles",
-    body: "Voice and audience — used every time you generate.",
+    title: "Set up your brand context",
+    body: "Voice, audience, and source links that guide every generation.",
   },
   {
     href: "/generate",
     kicker: "Create",
-    title: "Generate a content pack",
-    body: "3 complete post packs (hook, caption, CTA, visuals) — saved automatically.",
+    title: "Generate ready-to-use content",
+    body: "Create 3 complete post packs for a brand and save the full run automatically.",
   },
   {
     href: "/library",
     kicker: "Saved",
-    title: "Copy past packs",
-    body: "Open any run to see full text and copy buttons.",
+    title: "Review saved generations",
+    body: "Open any run to see the full packs, summaries, and generated assets in one place.",
   },
 ] as const;
 
@@ -73,7 +73,7 @@ export default async function DashboardPage() {
           Hi, {displayName}
         </h1>
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ui-muted sm:mt-6 sm:text-base">
-          Set up your brand, create a pack, then copy from Saved anytime.
+          Set up your brand, generate complete content packs, and revisit every saved run from one workspace.
         </p>
         {orgCtx ? (
           <div className="mt-8 grid w-full grid-cols-1 gap-px bg-black sm:mt-10 sm:grid-cols-2">

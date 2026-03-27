@@ -10,6 +10,7 @@ type Props = {
   parsed: PostPackFields;
   packTitle: string | null;
   size?: "default" | "large";
+  inPhone?: boolean;
 };
 
 function initials(name: string): string {
@@ -51,17 +52,28 @@ function CaptionBlock({
   parsed,
   packTitle,
   compact,
+  inPhone,
+  size,
 }: {
   parsed: Props["parsed"];
   packTitle: string | null;
   compact?: boolean;
+  inPhone?: boolean;
+  size?: Props["size"];
 }) {
+  const phoneLarge = inPhone && size === "large";
   return (
     <div className={compact ? "px-3 pb-3 pt-2" : "px-3 pb-4 pt-3"}>
       {packTitle ? (
         <p className={`font-semibold text-neutral-900 ${compact ? "text-[13px]" : "text-sm"}`}>{packTitle}</p>
       ) : null}
-      <p className={`mt-1 whitespace-pre-wrap text-neutral-800 ${compact ? "text-[13px] leading-snug" : "text-sm leading-relaxed"}`}>
+      <p
+        className={[
+          "mt-1 whitespace-pre-wrap text-neutral-800",
+          compact ? "text-[13px] leading-snug" : "text-sm leading-relaxed",
+          inPhone ? (phoneLarge ? "line-clamp-7" : "line-clamp-5") : "",
+        ].join(" ")}
+      >
         <span className="font-medium">{parsed.hook}</span>
         {"\n\n"}
         {parsed.caption}
@@ -70,10 +82,38 @@ function CaptionBlock({
         <p className={`mt-2 text-neutral-600 ${compact ? "text-xs" : "text-[13px]"}`}>{parsed.call_to_action}</p>
       ) : null}
       <p
-        className={`mt-2 whitespace-pre-wrap text-blue-900/90 ${compact ? "text-[12px]" : "text-[13px] leading-relaxed"}`}
+        className={[
+          "mt-2 whitespace-pre-wrap text-blue-900/90",
+          compact ? "text-[12px]" : "text-[13px] leading-relaxed",
+          inPhone ? (phoneLarge ? "line-clamp-3" : "line-clamp-2") : "",
+        ].join(" ")}
       >
         {parsed.hashtags}
       </p>
+    </div>
+  );
+}
+
+function IgActionBar() {
+  return (
+    <div className="border-b border-black/5 px-3 py-2">
+      <div className="flex items-center justify-between text-neutral-900">
+        <div className="flex items-center gap-3">
+          <HeartIcon />
+          <CommentIcon />
+          <ShareIcon />
+        </div>
+        <BookmarkIcon />
+      </div>
+      <p className="mt-1 text-[11px] font-medium text-neutral-700">1,204 likes</p>
+    </div>
+  );
+}
+
+function FbMetaRow() {
+  return (
+    <div className="border-b border-[#dddfe2] bg-white px-3 py-2">
+      <p className="text-[12px] text-[#65676B]">235 reactions · 18 comments · 7 shares</p>
     </div>
   );
 }
@@ -115,27 +155,46 @@ function FbHeader({ brandName }: { brandName: string }) {
   );
 }
 
-function InstagramStaticPreview({ brandName, parsed, packTitle, size = "default" }: Props) {
-  const maxWidth = size === "large" ? "max-w-[460px]" : "max-w-[400px]";
-  const maxHeight = size === "large" ? "max-h-[min(88vw,460px)]" : "max-h-[min(85vw,400px)]";
+function InstagramStaticPreview({ brandName, parsed, packTitle, size = "default", inPhone = false }: Props) {
+  const maxWidth = inPhone ? "max-w-none" : size === "large" ? "max-w-[460px]" : "max-w-[400px]";
+  const maxHeight = inPhone
+    ? size === "large"
+      ? "max-h-[320px]"
+      : "max-h-[240px]"
+    : size === "large"
+      ? "max-h-[min(88vw,460px)]"
+      : "max-h-[min(85vw,400px)]";
 
   return (
     <div className={`mx-auto w-full ${maxWidth} overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm`}>
       <IgHeader brandName={brandName} />
       <PreviewImage src={parsed.image_url} alt="" aspectClass={`aspect-square ${maxHeight}`} />
-      <CaptionBlock parsed={parsed} packTitle={packTitle} compact />
+      <IgActionBar />
+      <CaptionBlock parsed={parsed} packTitle={packTitle} compact inPhone={inPhone} size={size} />
     </div>
   );
 }
 
-function InstagramCarouselPreview({ brandName, parsed, packTitle, size = "default" }: Props) {
+function InstagramCarouselPreview({
+  brandName,
+  parsed,
+  packTitle,
+  size = "default",
+  inPhone = false,
+}: Props) {
   const slides = parsed.slides;
   const [idx, setIdx] = useState(0);
   const active = slides[idx] ?? slides[0];
   const src = active?.image_url ?? null;
   const n = slides.length;
-  const maxWidth = size === "large" ? "max-w-[460px]" : "max-w-[400px]";
-  const maxHeight = size === "large" ? "max-h-[min(88vw,460px)]" : "max-h-[min(85vw,400px)]";
+  const maxWidth = inPhone ? "max-w-none" : size === "large" ? "max-w-[460px]" : "max-w-[400px]";
+  const maxHeight = inPhone
+    ? size === "large"
+      ? "max-h-[320px]"
+      : "max-h-[240px]"
+    : size === "large"
+      ? "max-h-[min(88vw,460px)]"
+      : "max-h-[min(85vw,400px)]";
 
   const go = (d: number) => {
     setIdx((i) => {
@@ -190,14 +249,21 @@ function InstagramCarouselPreview({ brandName, parsed, packTitle, size = "defaul
           {active.title ? `: ${active.title}` : ""}
         </p>
       ) : null}
-      <CaptionBlock parsed={parsed} packTitle={packTitle} compact />
+      <IgActionBar />
+      <CaptionBlock parsed={parsed} packTitle={packTitle} compact inPhone={inPhone} size={size} />
     </div>
   );
 }
 
-function FacebookStaticPreview({ brandName, parsed, packTitle, size = "default" }: Props) {
-  const maxWidth = size === "large" ? "max-w-[620px]" : "max-w-[500px]";
-  const maxHeight = size === "large" ? "max-h-[min(72vw,500px)]" : "max-h-[min(70vw,420px)]";
+function FacebookStaticPreview({ brandName, parsed, packTitle, size = "default", inPhone = false }: Props) {
+  const maxWidth = inPhone ? "max-w-none" : size === "large" ? "max-w-[620px]" : "max-w-[500px]";
+  const maxHeight = inPhone
+    ? size === "large"
+      ? "max-h-[260px]"
+      : "max-h-[200px]"
+    : size === "large"
+      ? "max-h-[min(72vw,500px)]"
+      : "max-h-[min(70vw,420px)]";
 
   return (
     <div className={`mx-auto w-full ${maxWidth} overflow-hidden rounded-lg border border-[#dddfe2] bg-white shadow-sm`}>
@@ -206,6 +272,7 @@ function FacebookStaticPreview({ brandName, parsed, packTitle, size = "default" 
         <span className="font-semibold">{parsed.hook}</span>
       </p>
       <PreviewImage src={parsed.image_url} alt="" aspectClass={`aspect-[1.91/1] ${maxHeight} bg-[#f0f2f5]`} />
+      <FbMetaRow />
       <div className="bg-[#f0f2f5] px-3 py-2.5">
         <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[#050505]">{parsed.caption}</p>
         {parsed.call_to_action ? (
@@ -218,14 +285,26 @@ function FacebookStaticPreview({ brandName, parsed, packTitle, size = "default" 
   );
 }
 
-function FacebookCarouselPreview({ brandName, parsed, packTitle, size = "default" }: Props) {
+function FacebookCarouselPreview({
+  brandName,
+  parsed,
+  packTitle,
+  size = "default",
+  inPhone = false,
+}: Props) {
   const slides = parsed.slides;
   const [idx, setIdx] = useState(0);
   const active = slides[idx] ?? slides[0];
   const src = active?.image_url ?? null;
   const n = slides.length;
-  const maxWidth = size === "large" ? "max-w-[620px]" : "max-w-[500px]";
-  const maxHeight = size === "large" ? "max-h-[min(72vw,500px)]" : "max-h-[min(70vw,420px)]";
+  const maxWidth = inPhone ? "max-w-none" : size === "large" ? "max-w-[620px]" : "max-w-[500px]";
+  const maxHeight = inPhone
+    ? size === "large"
+      ? "max-h-[260px]"
+      : "max-h-[200px]"
+    : size === "large"
+      ? "max-h-[min(72vw,500px)]"
+      : "max-h-[min(70vw,420px)]";
 
   const go = (d: number) => {
     setIdx((i) => {
@@ -274,6 +353,7 @@ function FacebookCarouselPreview({ brandName, parsed, packTitle, size = "default
           {active.title ? ` — ${active.title}` : ""}
         </p>
       ) : null}
+      <FbMetaRow />
       <div className="bg-[#f0f2f5] px-3 py-2.5">
         <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[#050505]">{parsed.caption}</p>
         {parsed.call_to_action ? (
@@ -322,6 +402,62 @@ function ChevronRightIcon() {
         d="M9 18l6-6-6-6"
         stroke="currentColor"
         strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function HeartIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M12.1 20.3l-.1.1-.1-.1C7.1 16 4 13.1 4 9.6 4 7.4 5.7 5.7 7.9 5.7c1.3 0 2.5.6 3.2 1.6.7-1 1.9-1.6 3.2-1.6 2.2 0 3.9 1.7 3.9 3.9 0 3.5-3.1 6.4-7.9 10.7z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function CommentIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M21 11.5c0 4.1-4 7.5-9 7.5-1.3 0-2.6-.2-3.7-.6L3 20l1.4-4.1C3.5 14.7 3 13.1 3 11.5 3 7.4 7 4 12 4s9 3.4 9 7.5z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ShareIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function BookmarkIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M6 3h12v18l-6-3-6 3V3z"
+        stroke="currentColor"
+        strokeWidth="1.7"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { PostPackImageActions } from "@/components/library/post-pack-image-actions";
 import type { PostPackAssetRow } from "@/components/library/post-pack-block";
 import { PostPackSocialPreview } from "@/components/social-preview/post-pack-social-preview";
@@ -12,6 +12,57 @@ type Props = {
   brandName: string;
   postPacks: PostPackAssetRow[];
 };
+
+function IPhoneMockup({
+  children,
+  size = "default",
+}: {
+  children: ReactNode;
+  size?: "default" | "large";
+}) {
+  const large = size === "large";
+  return (
+    <div className={`mx-auto w-full ${large ? "max-w-[460px]" : "max-w-[390px]"}`}>
+      <div
+        className={[
+          "relative border border-black/35 bg-neutral-950 shadow-[0_26px_70px_rgba(0,0,0,0.28)]",
+          large ? "rounded-[52px] p-3" : "rounded-[44px] p-[10px]",
+        ].join(" ")}
+      >
+        <div
+          className={[
+            "relative aspect-9/19.5 overflow-hidden border border-black/20 bg-white",
+            large ? "rounded-[42px]" : "rounded-[36px]",
+          ].join(" ")}
+        >
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-center pt-2">
+            <div
+              className={[
+                "rounded-full bg-neutral-950/95 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1)]",
+                large ? "h-8 w-40" : "h-7 w-36",
+              ].join(" ")}
+            />
+          </div>
+          <div
+            className={[
+              "pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between font-medium text-neutral-800",
+              large ? "px-7 pt-2.5 text-xs" : "px-6 pt-2 text-[11px]",
+            ].join(" ")}
+          >
+            <span>9:41</span>
+            <span>5G</span>
+          </div>
+          <div className={`h-full px-2 ${large ? "pb-6 pt-12" : "pb-5 pt-11"}`}>
+            {children}
+          </div>
+          <div className="pointer-events-none absolute inset-x-0 bottom-2 flex justify-center">
+            <div className="h-1.5 w-24 rounded-full bg-black/75" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function Field({ label, value }: { label: string; value: string }) {
   return (
@@ -110,15 +161,18 @@ export function LibraryDetailPostPacks({ brandName, postPacks }: Props) {
 
       <section className="rounded-none border border-black/20 bg-ui-bg p-4 sm:p-5 lg:hidden">
         <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-ui-muted-dim">Live preview</p>
-        <p className="mt-1 text-xs text-ui-muted-dim">Larger, always-visible preview while you review copy.</p>
+        <p className="mt-1 text-xs text-ui-muted-dim">iPhone preview while you review copy.</p>
         <div className="mt-4">
-          <PostPackSocialPreview
-            brandName={brandName}
-            platform={selected.platform}
-            parsed={parsed}
-            packTitle={selected.title}
-            size="large"
-          />
+          <IPhoneMockup>
+            <PostPackSocialPreview
+              brandName={brandName}
+              platform={selected.platform}
+              parsed={parsed}
+              packTitle={selected.title}
+              size="default"
+              inPhone
+            />
+          </IPhoneMockup>
         </div>
       </section>
 
@@ -166,15 +220,18 @@ export function LibraryDetailPostPacks({ brandName, postPacks }: Props) {
         <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
           <section className="hidden rounded-none border border-black/20 bg-ui-bg p-4 sm:p-5 lg:block">
             <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-ui-muted-dim">Live preview</p>
-            <p className="mt-1 text-xs text-ui-muted-dim">Larger, always-visible preview while you review copy.</p>
+            <p className="mt-1 text-xs text-ui-muted-dim">iPhone preview while you review copy.</p>
             <div className="mt-4">
-              <PostPackSocialPreview
-                brandName={brandName}
-                platform={selected.platform}
-                parsed={parsed}
-                packTitle={selected.title}
-                size="large"
-              />
+              <IPhoneMockup size="large">
+                <PostPackSocialPreview
+                  brandName={brandName}
+                  platform={selected.platform}
+                  parsed={parsed}
+                  packTitle={selected.title}
+                  size="large"
+                  inPhone
+                />
+              </IPhoneMockup>
             </div>
           </section>
 

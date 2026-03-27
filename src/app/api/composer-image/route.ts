@@ -2,6 +2,8 @@ import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import { getCurrentOrganizationId } from "@/lib/org";
 import { getOptionalOpenAIApiKey } from "@/lib/env/server";
+import { mapImageProviderError } from "@/lib/generate/images/errors";
+import { generateImage } from "@/lib/generate/images/generate-image";
 import {
   buildFallbackImagePrompt,
   transformImagePromptForPostPack,
@@ -74,34 +76,28 @@ export async function POST(request: Request) {
     prompt = buildFallbackImagePrompt(promptInput);
   }
 
-  const model = process.env.OPENAI_IMAGE_MODEL?.trim() || "gpt-image-1";
-  const canUseReferences = referenceImages.length > 0 && model.startsWith("gpt-image");
-
-  const result = canUseReferences
-    ? await openai.images.edit({
-        model,
-        image: referenceImages,
-        prompt,
+  try {
+    const out = await generateImage({
+      prompt,
+      options: {
         size: "1024x1024",
         quality: "high",
-      })
-    : await openai.images.generate({
-        model,
-        prompt,
-        n: 1,
-        size: "1024x1024",
-        quality: "high",
-        output_format: "png",
-      });
+        referenceImages: await Promise.all(
+          referenceImages.map(async (image, index) => ({
+            buffer: Buffer.from(await image.arrayBuffer()),
+            mimeType: image.type || "image/png",
+            filename: image.name || `reference-${index + 1}.png`,
+          })),
+        ),
+      },
+    });
 
-  const b64 = result.data?.[0]?.b64_json;
-  if (!b64) {
-    return NextResponse.json({ error: "No image returned from the model." }, { status: 502 });
+    return NextResponse.json({
+      imageUrl: `data:${out.mimeType};base64,${out.buffer.toString("base64")}`,
+      prompt,
+      usedReferenceImages: referenceImages.length,
+    });
+  } catch (err) {
+    return NextResponse.json({ error: mapImageProviderError(err) }, { status: 502 });
   }
-
-  return NextResponse.json({
-    imageUrl: `data:image/png;base64,${b64}`,
-    prompt,
-    usedReferenceImages: canUseReferences ? referenceImages.length : 0,
-  });
 }

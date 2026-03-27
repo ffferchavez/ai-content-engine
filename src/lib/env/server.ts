@@ -23,3 +23,12 @@ export function getOptionalOpenAIApiKey(): string | undefined {
   const v = process.env.OPENAI_API_KEY?.trim();
   return v || undefined;
 }
+
+/**
+ * Google Gemini API key for image generation via Nano Banana (`gemini-2.5-flash-image`).
+ * Accepts `GOOGLE_API_KEY` too, since the upstream SDK documents both conventions.
+ */
+export function getOptionalGeminiApiKey(): string | undefined {
+  const v = process.env.GEMINI_API_KEY?.trim() || process.env.GOOGLE_API_KEY?.trim();
+  return v || undefined;
+}

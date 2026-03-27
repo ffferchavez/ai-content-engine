@@ -64,10 +64,19 @@ if (errors.length) {
 
 console.log("Environment check passed (NEXT_PUBLIC_* Supabase vars look valid).");
 
+const imageProvider = process.env.IMAGE_GENERATION_PROVIDER?.trim().toLowerCase() || "openai";
+const imageFallback = process.env.IMAGE_GENERATION_FALLBACK_PROVIDER?.trim().toLowerCase();
+const gemini = process.env.GEMINI_API_KEY?.trim() || process.env.GOOGLE_API_KEY?.trim();
 const openai = process.env.OPENAI_API_KEY?.trim();
 if (!openai) {
   console.warn(
     "\nOptional: OPENAI_API_KEY is not set — Create / POST /api/generate will return 503 until you add it.\n",
+  );
+}
+
+if ((imageProvider === "gemini" || imageFallback === "gemini") && !gemini) {
+  console.warn(
+    "\nOptional: GEMINI_API_KEY is not set — Gemini / Nano Banana image generation will fall back or fail until you add it.\n",
   );
 }
 

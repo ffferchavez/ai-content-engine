@@ -1,26 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AssetBlock } from "@/components/library/asset-block";
-import { PostPackBlock } from "@/components/library/post-pack-block";
-import { CopyButton } from "@/components/ui/copy-button";
+import { useRouter } from "next/navigation";
 import {
   GENERATION_PLATFORMS,
   type GenerationPlatformId,
-  generationPlatformLabel,
 } from "@/lib/platforms";
 
 type BrandOption = { id: string; name: string; default_language: string };
-
-type AssetRow = {
-  id: string;
-  asset_type: string;
-  platform: string | null;
-  title: string | null;
-  body: string | null;
-  sort_order: number;
-  metadata?: unknown;
-};
 
 const TONES = [
   { value: "", label: "Match my brand (default)" },
@@ -50,11 +37,8 @@ const OBJECTIVES = [
   { value: "launch", label: "Launch or announcement" },
 ] as const;
 
-function languageLabel(code: string): string {
-  return LANG_OPTIONS.find((o) => o.value === code)?.label ?? code;
-}
-
 export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
+  const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [brandId, setBrandId] = useState(brands[0]?.id ?? "");
   const [topic, setTopic] = useState("");
@@ -64,8 +48,6 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
   const [objective, setObjective] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [summary, setSummary] = useState<string | null>(null);
-  const [assets, setAssets] = useState<AssetRow[]>([]);
 
   useEffect(() => {
     const b = brands.find((x) => x.id === brandId);
@@ -77,8 +59,6 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    setSummary(null);
-    setAssets([]);
     setPending(true);
     try {
       const res = await fetch("/api/generate", {
@@ -95,26 +75,23 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
       });
       const data = (await res.json()) as {
         error?: string;
-        summary?: string;
-        assets?: AssetRow[];
+        generationId?: string;
       };
       if (!res.ok) {
         setError(data.error ?? "Something went wrong");
         return;
       }
-      setSummary(data.summary ?? null);
-      setAssets(data.assets ?? []);
+      if (!data.generationId) {
+        setError("Generation completed, but we could not open the saved result.");
+        return;
+      }
+      router.push(`/library/${data.generationId}`);
+      router.refresh();
     } catch {
       setError("Network error. Try again.");
     } finally {
       setPending(false);
     }
-  }
-
-  function regenerateAnother() {
-    setSummary(null);
-    setAssets([]);
-    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   if (brands.length === 0) {
@@ -272,7 +249,7 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
             4. Brief & context
           </h2>
           <p className="mt-1 text-sm text-ui-muted-dim">
-            What to post about, plus any campaign notes, offers, or constraints. You’ll get 3–5 complete
+            What to post about, plus any campaign notes, offers, or constraints. You’ll get 3 complete
             post packs from this brief.
           </p>
           <div className="mt-3 flex flex-col gap-1.5">
@@ -305,72 +282,6 @@ export function GeneratePanel({ brands }: { brands: BrandOption[] }) {
           {pending ? "Generating…" : "Generate posts"}
         </button>
       </form>
-
-      {summary ? (
-        <section className="rounded-none border border-black bg-ui-bg p-6">
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <div>
-              <h2 className="text-[10px] font-medium uppercase tracking-[0.25em] text-ui-muted-dim">Overview</h2>
-              <p className="mt-2 text-base leading-relaxed text-ui-text">{summary}</p>
-            </div>
-            <CopyButton text={summary} label="Copy overview" />
-          </div>
-        </section>
-      ) : null}
-
-      {assets.length > 0 ? (
-        <section className="flex flex-col gap-4">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h2 className="text-xl font-medium tracking-[-0.02em] text-ui-text">Post packs</h2>
-              <p className="mt-1 text-sm text-ui-muted-dim">
-                Each card includes a platform-style preview plus full fields: angle, hook, caption, CTA,
-                hashtags, and visuals. Generate images from the Images section.
-              </p>
-              <p className="mt-1 text-xs text-ui-muted-dim">
-                {languageLabel(language)} · {generationPlatformLabel(platformId)}
-                {objective ? ` · ${OBJECTIVES.find((o) => o.value === objective)?.label ?? objective}` : ""}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={regenerateAnother}
-              className="rounded-none border border-black px-4 py-2 text-sm font-medium text-ui-text transition hover:bg-neutral-50"
-            >
-              New generation (same form)
-            </button>
-          </div>
-          <ul className="mt-6 border-t border-black">
-            {assets.map((a, i) =>
-              a.asset_type === "post_pack" ? (
-                <PostPackBlock
-                  key={a.id}
-                  brandName={brands.find((b) => b.id === brandId)?.name ?? "Brand"}
-                  asset={a}
-                  index={i}
-                  onAssetMetadataUpdate={(id, metadata) =>
-                    setAssets((prev) => prev.map((x) => (x.id === id ? { ...x, metadata } : x)))
-                  }
-                />
-              ) : (
-                <AssetBlock
-                  key={a.id}
-                  asset={{
-                    id: a.id,
-                    asset_type: a.asset_type,
-                    platform: a.platform,
-                    title: a.title,
-                    body: a.body,
-                  }}
-                />
-              ),
-            )}
-          </ul>
-          <p className="text-sm text-ui-muted-dim">
-            Saved automatically — open anytime under <span className="text-ui-muted">Saved</span>.
-          </p>
-        </section>
-      ) : null}
     </div>
   );
 }

@@ -69,7 +69,7 @@ Carousel rules:
 ## Helion quality bar
 - Write like someone who posts for this brand weekly: concrete nouns, real scenarios, specific details from the brand context.
 - Each pack is ONE complete post. Hook + caption + CTA + hashtags + visuals must feel cohesive.
-- Make the 3–5 packs clearly different (angle, format, hook) — not small rewrites of the same idea.
+- Make the 3 packs clearly different (angle, format, hook) — not small rewrites of the same idea.
 
 ## Platform awareness (when the user names a platform, follow it strictly)
 - Instagram: punchy hook; carousels = clear slide progression.
@@ -89,12 +89,16 @@ Carousel rules:
 ## Objective
 - Align CTA and tone with the campaign objective in the user message.
 
+## Style guardrails
+- Avoid emoji-heavy copy and decorative icon spam. Use emojis only when the brand voice clearly calls for them or the user explicitly asks.
+- Prefer clean punctuation and strong wording over classic AI-looking embellishments.
+
 ## Banned patterns (unless the brand voice explicitly uses them)
 - "In today's fast-paced world", "unlock", "elevate your brand", "game-changer", "synergy", "leverage", "cutting-edge", "digital transformation", "join us on a journey".
 - Empty superlatives without proof or brand voice.
 
 ## Rules
-- Exactly 3, 4, or 5 items in post_packs — never fewer, never more.
+- Exactly 3 items in post_packs — never fewer, never more.
 - For carousel packs: slides array is REQUIRED with 3–7 slides. For non-carousel: do not include slides.
 - Every required string field must be non-empty where specified. Use null for image_prompt when omitting.
 - suggested_format must be one of: carousel, reel, static post, story.`;
@@ -181,7 +185,7 @@ const OBJECTIVE_LABELS: Record<string, string> = {
 };
 
 const RETRY_USER_SUFFIX =
-  "CRITICAL: The top-level JSON must include post_packs as an array with length 3, 4, or 5 only (not 1, not 2, not 6+). Each object must include every required string field so nothing is dropped during validation.";
+  "CRITICAL: The top-level JSON must include post_packs as an array with length 3 only. Each object must include every required string field so nothing is dropped during validation.";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
@@ -196,7 +200,7 @@ function shouldRetryStructuredAttempt(err: unknown): boolean {
   const m = err.message;
   if (m.includes("OPENAI_API_KEY")) return false;
   return (
-    m.includes("Expected 3–5 post packs") ||
+    m.includes("Expected exactly 3 post packs") ||
     m.includes("Model did not return valid JSON") ||
     m.includes("Invalid JSON shape") ||
     m.includes("Empty model response")
@@ -237,7 +241,7 @@ async function runStructuredGenerationOnce(
     params.platform
       ? `Primary platform: ${params.platform} — hooks, caption length, line breaks, and hashtag style must match what performs there.`
       : "If no platform was given, choose sensible defaults per post (vary formats) and note the assumed platform in each post_angle only if helpful.",
-    "Return 3–5 complete post_packs as specified. For carousel packs, include a slides array (3–7 slides). image_prompt may be null.",
+    "Return exactly 3 complete post_packs as specified. For carousel packs, include a slides array (3–7 slides). image_prompt may be null.",
     options.appendRetryHint ? RETRY_USER_SUFFIX : "",
   ]
     .filter(Boolean)
@@ -279,9 +283,9 @@ async function runStructuredGenerationOnce(
 
   const post_packs = parsePostPacks(obj.post_packs);
 
-  if (post_packs.length < 3 || post_packs.length > 5) {
+  if (post_packs.length !== 3) {
     throw new Error(
-      `Expected 3–5 post packs, got ${post_packs.length}. Try again — the model returned an invalid batch.`,
+      `Expected exactly 3 post packs, got ${post_packs.length}. Try again — the model returned an invalid batch.`,
     );
   }
 

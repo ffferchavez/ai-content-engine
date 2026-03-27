@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { AppSidebar } from "@/components/app/app-sidebar";
 import { HelionWordmarkLink } from "@/components/brand/helion-wordmark";
 import { MAIN_PAD, PAGE_INSET } from "@/lib/ui/shell";
@@ -13,7 +13,7 @@ const APP_HEADER_CLASS = "public-header-safe-top shrink-0 border-b border-neutra
 function AppSidebarPlaceholder() {
   return (
     <aside
-      className="relative hidden h-full min-h-0 w-[248px] shrink-0 flex-col border-r border-neutral-200/80 bg-[#fafafa] md:flex"
+      className="relative hidden h-full min-h-0 w-[76px] shrink-0 flex-col border-r border-neutral-200/80 bg-[#fafafa] md:flex"
       aria-hidden
     />
   );
@@ -53,11 +53,11 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [shellReady, setShellReady] = useState(false);
-
-  useEffect(() => {
-    setShellReady(true);
-  }, []);
+  const shellReady = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   return (
     <div

@@ -13,6 +13,11 @@ type Props = {
   inPhone?: boolean;
 };
 
+const previewFontStyle = {
+  fontFamily:
+    'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+} as const;
+
 function initials(name: string): string {
   const t = name.trim();
   if (!t) return "?";
@@ -166,7 +171,10 @@ function InstagramStaticPreview({ brandName, parsed, packTitle, size = "default"
       : "max-h-[min(85vw,400px)]";
 
   return (
-    <div className={`mx-auto w-full ${maxWidth} overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm`}>
+    <div
+      className={`mx-auto w-full ${maxWidth} overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm`}
+      style={previewFontStyle}
+    >
       <IgHeader brandName={brandName} />
       <PreviewImage src={parsed.image_url} alt="" aspectClass={`aspect-square ${maxHeight}`} />
       <IgActionBar />
@@ -206,7 +214,10 @@ function InstagramCarouselPreview({
   };
 
   return (
-    <div className={`mx-auto w-full ${maxWidth} overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm`}>
+    <div
+      className={`mx-auto w-full ${maxWidth} overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm`}
+      style={previewFontStyle}
+    >
       <IgHeader brandName={brandName} />
       <div className="relative bg-black/5">
         <PreviewImage src={src} alt={active ? `Slide ${active.slide_number}` : ""} aspectClass={`aspect-square ${maxHeight}`} />
@@ -266,7 +277,10 @@ function FacebookStaticPreview({ brandName, parsed, packTitle, size = "default",
       : "max-h-[min(70vw,420px)]";
 
   return (
-    <div className={`mx-auto w-full ${maxWidth} overflow-hidden rounded-lg border border-[#dddfe2] bg-white shadow-sm`}>
+    <div
+      className={`mx-auto w-full ${maxWidth} overflow-hidden rounded-lg border border-[#dddfe2] bg-white shadow-sm`}
+      style={previewFontStyle}
+    >
       <FbHeader brandName={brandName} />
       <p className="px-3 pb-2 text-[15px] leading-snug text-[#050505]">
         <span className="font-semibold">{parsed.hook}</span>
@@ -316,7 +330,10 @@ function FacebookCarouselPreview({
   };
 
   return (
-    <div className={`mx-auto w-full ${maxWidth} overflow-hidden rounded-lg border border-[#dddfe2] bg-white shadow-sm`}>
+    <div
+      className={`mx-auto w-full ${maxWidth} overflow-hidden rounded-lg border border-[#dddfe2] bg-white shadow-sm`}
+      style={previewFontStyle}
+    >
       <FbHeader brandName={brandName} />
       <p className="px-3 pb-2 text-[15px] leading-snug text-[#050505]">
         <span className="font-semibold">{parsed.hook}</span>
@@ -368,7 +385,10 @@ function FacebookCarouselPreview({
 
 function TextOnlyConceptPreview({ brandName, parsed, packTitle, label }: Props & { label: string }) {
   return (
-    <div className="mx-auto w-full max-w-[400px] overflow-hidden rounded-xl border border-dashed border-black/20 bg-ui-bg/80 p-4">
+    <div
+      className="mx-auto w-full max-w-[400px] overflow-hidden rounded-xl border border-dashed border-black/20 bg-ui-bg/80 p-4"
+      style={previewFontStyle}
+    >
       <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-ui-muted-dim">{label}</p>
       <p className="mt-2 text-xs text-ui-muted-dim">
         No feed preview for this format — copy below is what you&apos;d produce or film separately.

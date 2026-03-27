@@ -49,7 +49,7 @@ export default async function GeneratePage() {
           New content pack
         </h1>
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ui-muted sm:mt-6 sm:text-base">
-          Choose a brand, platform, language, tone, and goal — then get 3–5 complete post packs (angle,
+          Choose a brand, platform, language, tone, and goal — then get 3 complete post packs (angle,
           format, hook, caption, CTA, hashtags, visual direction). Saved automatically to your library.
         </p>
       </header>

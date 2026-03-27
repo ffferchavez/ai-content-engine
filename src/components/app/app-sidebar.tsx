@@ -6,13 +6,11 @@ import {
   Bookmark,
   Building2,
   Home,
-  PanelLeftClose,
-  PanelLeft,
   Settings,
   Sparkles,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { UserAvatarPlaceholder } from "@/components/app/user-avatar-placeholder";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -33,8 +31,6 @@ function isActive(pathname: string, href: string) {
   }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
-
-const STORAGE_KEY = "helion-sidebar-collapsed";
 
 function SidebarNavLinks({
   collapsed,
@@ -208,27 +204,7 @@ export function AppSidebar({
   initials: string;
 }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const [collapsed, setCollapsed] = useState(false);
-
-  useEffect(() => {
-    queueMicrotask(() => {
-      try {
-        if (localStorage.getItem(STORAGE_KEY) === "true") {
-          setCollapsed(true);
-        }
-      } catch {
-        /* ignore */
-      }
-    });
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, collapsed ? "true" : "false");
-    } catch {
-      /* ignore */
-    }
-  }, [collapsed]);
+  const [desktopExpanded, setDesktopExpanded] = useState(false);
 
   useEffect(() => {
     if (!isDesktop) return;
@@ -249,39 +225,12 @@ export function AppSidebar({
     };
   }, [mobileOpen, isDesktop]);
 
-  const toggleCollapsed = useCallback(() => {
-    setCollapsed((c) => !c);
-  }, []);
-
-  const railToggle = isDesktop && (
-    <div className="shrink-0 border-t border-neutral-200/80 bg-[#fafafa] p-2">
-      <button
-        type="button"
-        onClick={toggleCollapsed}
-        className={`${navLinkFocus} flex h-11 w-full items-center justify-center gap-2 rounded-lg text-neutral-500 transition-colors hover:bg-white hover:text-neutral-950 hover:shadow-sm`}
-        aria-expanded={!collapsed}
-        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-      >
-        {collapsed ? (
-          <PanelLeft className="size-[18px]" strokeWidth={1.5} aria-hidden />
-        ) : (
-          <>
-            <PanelLeftClose className="size-[18px]" strokeWidth={1.5} aria-hidden />
-            <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-500">
-              Collapse
-            </span>
-          </>
-        )}
-      </button>
-    </div>
-  );
-
   const userFooter = (
     <SidebarUserFooter
       userEmail={userEmail}
       displayName={displayName}
       initials={initials}
-      collapsed={collapsed}
+      collapsed={!desktopExpanded}
       isDesktop={isDesktop}
     />
   );
@@ -289,16 +238,17 @@ export function AppSidebar({
   return (
     <>
       <aside
+        onMouseEnter={() => setDesktopExpanded(true)}
+        onMouseLeave={() => setDesktopExpanded(false)}
         className={[
-          "relative hidden h-full min-h-0 shrink-0 flex-col border-r border-neutral-200/80 bg-[#fafafa] transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:flex",
-          collapsed ? "w-[76px]" : "w-[248px]",
+          "relative hidden h-full min-h-0 shrink-0 flex-col border-r border-neutral-200/80 bg-[#fafafa] transition-[width,box-shadow] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:flex",
+          desktopExpanded ? "w-[248px] shadow-[6px_0_24px_rgba(0,0,0,0.05)]" : "w-[76px]",
         ].join(" ")}
       >
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]">
-          <SidebarNavLinks collapsed={collapsed} isDesktop={isDesktop} />
+          <SidebarNavLinks collapsed={!desktopExpanded} isDesktop={isDesktop} />
         </div>
         {userFooter}
-        {railToggle}
       </aside>
 
       <div

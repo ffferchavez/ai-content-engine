@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { AssetBlock } from "@/components/library/asset-block";
 import { LibraryDetailPostPacks } from "@/components/library/library-detail-post-packs";
 import { SummaryWithCopy } from "@/components/library/summary-with-copy";
+import type { PostPackComposerField } from "@/lib/generate/post-pack";
 import { getCurrentOrganizationId } from "@/lib/org";
 import { formatPlatformForDisplay } from "@/lib/platforms";
 import { createClient } from "@/lib/supabase/server";
@@ -83,6 +84,21 @@ export default async function LibraryDetailPage({ params }: PageProps) {
     "summary" in gen.output_summary
       ? String((gen.output_summary as { summary?: string }).summary ?? "")
       : "";
+  const acceptedPost =
+    gen.output_summary &&
+    typeof gen.output_summary === "object" &&
+    gen.output_summary !== null &&
+    "accepted_post" in gen.output_summary &&
+    (gen.output_summary as { accepted_post?: unknown }).accepted_post &&
+    typeof (gen.output_summary as { accepted_post?: unknown }).accepted_post === "object"
+      ? ((gen.output_summary as {
+          accepted_post?: {
+            fields?: Partial<Record<PostPackComposerField, string>>;
+            generated_image_url?: string | null;
+            accepted_at?: string;
+          };
+        }).accepted_post ?? null)
+      : null;
 
   const when = new Date(gen.created_at).toLocaleString(undefined, {
     dateStyle: "medium",
@@ -118,7 +134,9 @@ export default async function LibraryDetailPage({ params }: PageProps) {
 
       {postPacks.length > 0 ? (
         <LibraryDetailPostPacks
+          generationId={gen.id}
           brandName={brandName}
+          initialAcceptedPost={acceptedPost}
           postPacks={postPacks.map((a) => ({
             id: a.id,
             asset_type: a.asset_type,

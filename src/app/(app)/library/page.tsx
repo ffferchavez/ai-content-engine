@@ -6,8 +6,20 @@ export const metadata = {
   title: "Saved",
 };
 
-export default async function LibraryPage() {
+const PAGE_SIZE = 3;
+
+type PageProps = {
+  searchParams?: Promise<{ page?: string }>;
+};
+
+export default async function LibraryPage({ searchParams }: PageProps) {
   const orgId = await getCurrentOrganizationId();
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const pageParam = resolvedSearchParams?.page;
+  const parsedPage = Number.parseInt(pageParam ?? "1", 10);
+  const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
 
   if (!orgId) {
     return (
@@ -21,12 +33,14 @@ export default async function LibraryPage() {
   }
 
   const supabase = await createClient();
-  const { data: gens, error } = await supabase
+  const { data: gens, error, count } = await supabase
     .from("content_generations")
-    .select("id, brand_id, created_at, status, input_payload, output_summary, error_message")
+    .select("id, brand_id, created_at, status, input_payload, output_summary, error_message", {
+      count: "exact",
+    })
     .eq("organization_id", orgId)
     .order("created_at", { ascending: false })
-    .limit(50);
+    .range(from, to);
 
   if (error) {
     console.error("[library] list:", error.message);
@@ -41,6 +55,10 @@ export default async function LibraryPage() {
   }
 
   const rows = gens ?? [];
+  const totalRows = count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalRows / PAGE_SIZE));
+  const hasPrev = page > 1;
+  const hasNext = page < totalPages;
 
   const brandIds = [...new Set(rows.map((r) => r.brand_id).filter((id): id is string => Boolean(id)))];
   const brandNames: Record<string, string> = {};
@@ -91,72 +109,107 @@ export default async function LibraryPage() {
           </p>
         </div>
       ) : (
-        <ul className="w-full border-t border-black">
-          {rows.map((g) => {
-            const payload = g.input_payload as { topic?: string } | null;
-            const topic = typeof payload?.topic === "string" ? payload.topic : "Generation";
-            const brandName =
-              g.brand_id && brandNames[g.brand_id] ? brandNames[g.brand_id] : "Brand";
-            const summary =
-              g.output_summary &&
-              typeof g.output_summary === "object" &&
-              g.output_summary !== null &&
-              "summary" in g.output_summary
-                ? String((g.output_summary as { summary?: string }).summary ?? "")
-              : "";
-            const when = new Date(g.created_at).toLocaleString(undefined, {
-              dateStyle: "medium",
-              timeStyle: "short",
-            });
-            const n = assetCounts[g.id] ?? 0;
+        <>
+          <ul className="w-full border-t border-black">
+            {rows.map((g) => {
+              const payload = g.input_payload as { topic?: string } | null;
+              const topic = typeof payload?.topic === "string" ? payload.topic : "Generation";
+              const brandName =
+                g.brand_id && brandNames[g.brand_id] ? brandNames[g.brand_id] : "Brand";
+              const summary =
+                g.output_summary &&
+                typeof g.output_summary === "object" &&
+                g.output_summary !== null &&
+                "summary" in g.output_summary
+                  ? String((g.output_summary as { summary?: string }).summary ?? "")
+                  : "";
+              const when = new Date(g.created_at).toLocaleString(undefined, {
+                dateStyle: "medium",
+                timeStyle: "short",
+              });
+              const n = assetCounts[g.id] ?? 0;
 
-            return (
-              <li key={g.id} className="w-full border-b border-black">
-                <Link
-                  href={`/library/${g.id}`}
-                  className="group flex w-full min-w-0 flex-col gap-4 py-8 transition-colors hover:bg-neutral-50 sm:flex-row sm:items-start sm:justify-between sm:gap-6 sm:py-10"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-ui-muted-dim">
-                      {when}
-                    </p>
-                    <p className="mt-2 text-xs font-medium uppercase tracking-wider text-ui-muted">{brandName}</p>
-                    <p className="mt-2 text-lg font-medium tracking-[-0.02em] text-ui-text sm:mt-3 sm:text-xl">
-                      {topic}
-                    </p>
-                    {summary ? (
-                      <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-ui-muted sm:mt-3 sm:line-clamp-2">
-                        {summary}
+              return (
+                <li key={g.id} className="w-full border-b border-black">
+                  <Link
+                    href={`/library/${g.id}`}
+                    className="group flex w-full min-w-0 flex-col gap-4 py-8 transition-colors hover:bg-neutral-50 sm:flex-row sm:items-start sm:justify-between sm:gap-6 sm:py-10"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-ui-muted-dim">
+                        {when}
                       </p>
-                    ) : null}
-                    {g.status === "failed" && g.error_message ? (
-                      <p className="mt-3 text-sm text-red-700">{g.error_message}</p>
-                    ) : null}
-                  </div>
-                  <div className="flex shrink-0 items-center justify-between gap-4 border-t border-black/10 pt-4 sm:w-auto sm:flex-col sm:items-end sm:border-t-0 sm:pt-0">
-                    <div className="text-left text-sm tabular-nums sm:text-right">
-                      {g.status === "completed" ? (
-                        <span className="text-emerald-800">
-                          {n} {n === 1 ? "post" : "posts"}
-                        </span>
-                      ) : g.status === "failed" ? (
-                        <span className="text-red-700">Failed</span>
-                      ) : (
-                        <span className="text-ui-muted-dim">{g.status}</span>
-                      )}
+                      <p className="mt-2 text-xs font-medium uppercase tracking-wider text-ui-muted">{brandName}</p>
+                      <p className="mt-2 text-lg font-medium tracking-[-0.02em] text-ui-text sm:mt-3 sm:text-xl">
+                        {topic}
+                      </p>
+                      {summary ? (
+                        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-ui-muted sm:mt-3 sm:line-clamp-2">
+                          {summary}
+                        </p>
+                      ) : null}
+                      {g.status === "failed" && g.error_message ? (
+                        <p className="mt-3 text-sm text-red-700">{g.error_message}</p>
+                      ) : null}
                     </div>
-                    <span
-                      className="text-2xl font-extralight leading-none text-ui-muted transition-colors group-hover:text-ui-text sm:text-3xl"
-                      aria-hidden
-                    >
-                      ›
-                    </span>
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+                    <div className="flex shrink-0 items-center justify-between gap-4 border-t border-black/10 pt-4 sm:w-auto sm:flex-col sm:items-end sm:border-t-0 sm:pt-0">
+                      <div className="text-left text-sm tabular-nums sm:text-right">
+                        {g.status === "completed" ? (
+                          <span className="text-emerald-800">
+                            {n} {n === 1 ? "post" : "posts"}
+                          </span>
+                        ) : g.status === "failed" ? (
+                          <span className="text-red-700">Failed</span>
+                        ) : (
+                          <span className="text-ui-muted-dim">{g.status}</span>
+                        )}
+                      </div>
+                      <span
+                        className="text-2xl font-extralight leading-none text-ui-muted transition-colors group-hover:text-ui-text sm:text-3xl"
+                        aria-hidden
+                      >
+                        ›
+                      </span>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+
+          {totalPages > 1 ? (
+            <nav
+              className="mt-8 flex items-center justify-between gap-4 border-t border-black pt-5"
+              aria-label="Saved pagination"
+            >
+              <Link
+                href={hasPrev ? `/library?page=${page - 1}` : "/library"}
+                aria-disabled={!hasPrev}
+                className={`inline-flex min-h-11 items-center border px-4 py-2.5 text-sm font-medium transition ${
+                  hasPrev
+                    ? "border-black text-ui-text hover:bg-neutral-50"
+                    : "pointer-events-none border-black/15 text-ui-muted-dim"
+                }`}
+              >
+                Newer
+              </Link>
+              <p className="text-sm text-ui-muted-dim">
+                Page {page} of {totalPages}
+              </p>
+              <Link
+                href={hasNext ? `/library?page=${page + 1}` : `/library?page=${page}`}
+                aria-disabled={!hasNext}
+                className={`inline-flex min-h-11 items-center border px-4 py-2.5 text-sm font-medium transition ${
+                  hasNext
+                    ? "border-black text-ui-text hover:bg-neutral-50"
+                    : "pointer-events-none border-black/15 text-ui-muted-dim"
+                }`}
+              >
+                Older
+              </Link>
+            </nav>
+          ) : null}
+        </>
       )}
     </div>
   );

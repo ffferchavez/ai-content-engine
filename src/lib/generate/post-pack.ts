@@ -44,6 +44,22 @@ export type PostPackFields = {
   slides: CarouselSlide[];
 } & PostPackMediaExtension;
 
+export const POST_PACK_COMPOSER_FIELDS = [
+  "hook",
+  "caption",
+  "call_to_action",
+  "hashtags",
+  "visual_direction",
+  "post_angle",
+] as const;
+
+export type PostPackComposerField = (typeof POST_PACK_COMPOSER_FIELDS)[number];
+
+export type PostPackComposerDraft = {
+  fields: Partial<Pick<PostPackFields, PostPackComposerField>>;
+  sources: Partial<Record<PostPackComposerField, number>>;
+};
+
 function isNonEmptyString(v: unknown): v is string {
   return typeof v === "string" && v.trim().length > 0;
 }
